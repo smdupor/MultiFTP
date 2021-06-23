@@ -13,7 +13,7 @@ void initialization_interaction(int argc, char *const *argv, char &choose, bool 
 
 int main(int argc, char *argv[]) {
    if(argc < 3) {
-      NetworkCommunicator::error("INVALID ARGUMENTS. Run command as: ./Client <letter code> <Registration Server Hostname>, "
+      UDP_Communicator::error("INVALID ARGUMENTS. Run command as: ./Client <letter code> <Registration Server Hostname>, "
                                  "e.g. './Client a 192.168.1.31\n");
       return EXIT_FAILURE;
    }
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
    // Advise the user we are booting.
    std::string start_msg =  "Starting Client with Code:   " + std::string(1, choose) + " \n";
-   NetworkCommunicator::info(start_msg);
+   UDP_Communicator::info(start_msg);
 
    // Boot appropriate client based on user's choice
    switch(choose) {
@@ -47,19 +47,19 @@ int main(int argc, char *argv[]) {
       case 'f': client.start("conf/f.conf"); break;
       case 'F': client.start("conf/f.conf"); break;
       default:
-         NetworkCommunicator::error("INVALID ARGUMENTS. Run command as: ./Client <letter code> <Registration Server Hostname>, "
+         UDP_Communicator::error("INVALID ARGUMENTS. Run command as: ./Client <letter code> <Registration Server Hostname>, "
                                     "e.g. './Client a 192.168.1.31\n");
          return EXIT_FAILURE;
          break;
    }
 
    // Fork off the keep_alive continuous loop thread
-   std::thread keep_alive_thread = std::thread(&MftpClient::keep_alive, &client);
-   keep_alive_thread.detach();
+  // std::thread keep_alive_thread = std::thread(&MftpClient::keep_alive, &client);
+   //keep_alive_thread.detach();
 
    // Fork off the downloader ("client") component thread
-   std::thread downloader_thread = std::thread(&MftpClient::downloader, &client);
-   downloader_thread.detach();
+  // std::thread downloader_thread = std::thread(&MftpClient::downloader, &client);
+   //downloader_thread.detach();
 
    // Set up  and start the listener ("file server") in the main thread
    socklen_t clilen;
@@ -70,8 +70,8 @@ int main(int argc, char *argv[]) {
    // callback from the registration server upon leaving.
    while(client.get_system_on()){
       int new_sockfd = accept(listen_socket, (struct sockaddr *) &cli_addr, &clilen);
-      std::thread accept_thread(&MftpClient::accept_download_request, &client, new_sockfd);
-      accept_thread.detach();
+  //    std::thread accept_thread(&MftpClient::accept_download_request, &client, new_sockfd);
+   //   accept_thread.detach();
    }
 
    // Close the listener and wait for all remaining socket transactions to fully wind down in the API.
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
    //Say goodbye and exit.
-   NetworkCommunicator::info("***************System is exiting successfully***********\n");
+   UDP_Communicator::info("***************System is exiting successfully***********\n");
 		return EXIT_SUCCESS;
 }
 
@@ -88,14 +88,14 @@ void initialization_interaction(int argc, char *const *argv, char &choose, bool 
    verbosity= false;
    server_id= std::string(argv[2]);
    if(server_id == "127.0.0.1" || server_id == "localhost") {
-      NetworkCommunicator::warning("You have selected a localhost loopback address for the registration server.\n"
+      UDP_Communicator::warning("You have selected a localhost loopback address for the registration server.\n"
                                    "Your publicly-available IP address will not be detected properly, and communication\n"
                                    "with external clients will fail, unless ALL clients are running on the localhost.\n\n");
-      NetworkCommunicator::error("Are you sure you want to continue with the localhost loopback adapter? (y/n): ");
+      UDP_Communicator::error("Are you sure you want to continue with the localhost loopback adapter? (y/n): ");
       char ip_choice;
       std::cin >> ip_choice;
       if(ip_choice=='n'){
-         NetworkCommunicator::warning("Enter the new hostname/IP address: ");
+         UDP_Communicator::warning("Enter the new hostname/IP address: ");
          std::cin >> server_id;
       }
    }

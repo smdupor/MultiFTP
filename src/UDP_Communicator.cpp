@@ -1,18 +1,4 @@
 /**
- * UDP_Communicator.cpp
- *
- * The UDP_Communicator superclass encapsulates all functionality that is shared by both major components of the system,
- * the Registration Server and the P2P Client. This includes establishing listening sockets, establishing outgoing
- * connections, transmitting strings of data on the TCP stream, and receiving strings of data back. Any universally-shared
- * instance variables (such as port, a list of peers, verbosity flags) are also encapsulated in this superclass.
- *
- * Also, all of the messaging constants, and system-wide numeric constants (like timeout settings) are encapsulated here.
- *
- * Finally, universally shared utility methods, such as a string splitter and multiple pretty-print methods, are
- * encapsulated here.
- *
- *  Created on: May 31, 2021
- *      Author: smdupor
  */
 
 #include "UDP_Communicator.h"
@@ -103,12 +89,6 @@ int UDP_Communicator::get_port() {
    return this->port;
 }
 
-/**
- * Stub method to handle all the ttl timers. Override in subclasses.
- */
-void UDP_Communicator::ttl_decrementer() {
-   //Override in subclasses
-}
 
 /**
  * Handle transmitting a string of characters to a remote host.
@@ -143,12 +123,12 @@ std::string UDP_Communicator::receive(int sockfd) {
 
    std::string in_message = std::string("");
 
-   // As long as data is coming in, keep reading.
+  /* // As long as data is coming in, keep reading.
    while (true) {
       bzero(in_buffer, MSG_LEN * 2);
       n = read(sockfd, in_buffer, MSG_LEN * 2);
       verbose(std::to_string(sockfd) + "\n");
-      if (n < 0 || timeout_counter > kTimeoutRetry) {
+     if (n < 0 || timeout_counter > kTimeoutRetry) {
          if(system_on)
             verbose("Client closed connection prematurely. " + std::to_string(sockfd) );
          return kDone + " \n";
@@ -166,7 +146,8 @@ std::string UDP_Communicator::receive(int sockfd) {
          in_message = in_message.substr(0, in_message.length() - 1); // Strip the extra newline
          return in_message;
       }
-   }
+   }*/
+  return "asdf";
 }
 
 /**

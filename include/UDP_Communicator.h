@@ -36,6 +36,8 @@ class UDP_Communicator{
 
 protected:
 
+   static const int MSG_LEN = 1024; // TODO: Get rid of this constant, needs to be come variable
+
 	std::string log;
 	int port;
 	bool debug, system_on;
@@ -49,9 +51,7 @@ protected:
 
    // Utility methods
    std::vector<std::string> split(const std::string &input, char delim);
-   void print_sent(std::string input);
-   void print_recv(std::string input);
-   void verbose(std::string input);
+
 
 public:
 	virtual ~UDP_Communicator();
@@ -62,6 +62,9 @@ public:
    static void error(std::string input);
    static void warning(std::string input);
    static void info(std::string input);
+   static void print_sent(std::string input);
+   static void print_recv(std::string input);
+   void verbose(std::string input);
 
 };
 

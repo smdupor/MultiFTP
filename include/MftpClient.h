@@ -1,8 +1,8 @@
 /**
  */
 
-#ifndef INCLUDE_P2PCLIENT_H_
-#define INCLUDE_P2PCLIENT_H_
+#ifndef INCLUDE_MFTPCLIENT_H_
+#define INCLUDE_MFTPCLIENT_H_
 
 #include <iostream>
 #include <cstring>
@@ -12,6 +12,7 @@
 #include <ctime>
 #include <algorithm>
 #include <vector>
+#include <fstream>
 #include <thread>
 #include <mutex>
 
@@ -28,7 +29,7 @@
 
 
 /**
- * Encapsulate a datapoint for a time value when a qty of files have been downloaded.
+ * Encapsulate a datapoint for an accurate time value.
  */
 struct LogItem {
    // On creation, log the immediate (steady) time and the input quantity
@@ -41,9 +42,6 @@ struct LogItem {
 };
 
 
-/**
- * P2P Client subclass header.
- */
 class MftpClient : public UDP_Communicator {
 
 private:
@@ -54,7 +52,7 @@ private:
    inline void check_files();
 
    void write_time_log();
-   void downloader_backoff(size_t past_local_qty, int &backoff_time);
+   //void downloader_backoff(size_t past_local_qty, int &backoff_time);
    void shutdown_system();
 
 public:
@@ -65,4 +63,4 @@ public:
 
 };
 
-#endif /* INCLUDE_P2PCLIENT_H_ */
+#endif /* INCLUDE_MFTPCLIENT_H_ */
