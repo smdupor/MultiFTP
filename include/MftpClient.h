@@ -42,12 +42,12 @@ struct LogItem {
 };
 
 struct RemoteClient {
-   explicit RemoteClient(sockaddr *addr) {
+   explicit RemoteClient(sockaddr_in *addr) {
       this->address = addr;
       segment_num = -1;
       ack_num = -1;
    }
-   sockaddr *address;
+   sockaddr_in *address;
    int segment_num, ack_num;
 };
 
