@@ -18,12 +18,12 @@ UDP_Communicator::~UDP_Communicator() {
  * @param listen_port Port to listen on
  * @return a socket file descriptor for the listening socket
  */
-int UDP_Communicator::listener(int listen_port) {
+int UDP_Communicator::create_inbound_UDP_socket(int port) {
    int sockfd; // socket descriptor
    struct sockaddr_in serv_addr; //socket addresses
 
    // Create the socket
-   sockfd = socket(AF_INET, SOCK_STREAM, 0);
+   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
    if (sockfd < 0) {
       error("ERROR opening socket");
       return -1;
@@ -32,19 +32,21 @@ int UDP_Communicator::listener(int listen_port) {
    // Initialize address and port values
    bzero((char *) &serv_addr, sizeof(serv_addr));
    serv_addr.sin_family = AF_INET;
-   serv_addr.sin_port = htons(listen_port);
+//   serv_addr.sin_addr.s_addr = INADDR_ANY;
+   serv_addr.sin_port = htons(port);
 
    // Bind the socket
-   if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+   if (bind(sockfd, (const struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
       error("Error on socket bind");
       return -1;
    }
 
    // Listen for new connections
-   verbose("LISTENING FOR CONNECTIONS on port: " + std::to_string(listen_port));
-   listen(sockfd, 12);
+   verbose("Incoming Socket bound to port: " + std::to_string(port));
    return sockfd;
 }
+
+
 
 /**
  * Establish a call-out connection from me to 'hostname' on 'port'

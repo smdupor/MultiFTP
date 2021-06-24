@@ -23,14 +23,15 @@ $(OBJ_DIR_LIB)/%.o:	$(SRC_DIR_LIB)/%.cpp $(HEAD_FILES)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 	
 $(BIN_DIR)/%:	$(OBJ_DIR_EXE)/%.o
-	$(CXX) -o $@ -s $(subst $(BIN_DIR)/,$(OBJ_DIR_EXE)/,$@).o $(OBJ_FILES_LIB) $(HEAD_FILES) $(LDFLAGS) $(CXXFLAGS)
+	$(CXX) -o $@ $(subst $(BIN_DIR)/,$(OBJ_DIR_EXE)/,$@).o $(OBJ_FILES_LIB) $(HEAD_FILES) $(LDFLAGS) $(CXXFLAGS)
 
 all:	$(EXEC_FILES) $(OBJ_FILES_LIB)
 	@echo "Cleaning and Symlinking."
 	rm -f obj/lib/*.o
 	rm -f obj/exe/*.o
-	ln -sf ./bin/Client Client
-	ln -sf ./bin/RegServ RegServ
+	#ln -sf ./bin/Client Client
+	#Note Bindir used to say :	$(CXX) -o $@ $(subst $(BIN_DIR)/,$(OBJ_DIR_EXE)/,$@).o $(OBJ_FILES_LIB) $(HEAD_FILES) $(LDFLAGS) $(CXXFLAGS)
+	#ln -sf ./bin/RegServ RegServ
 	@echo "****************************************************************************"
 	@echo "************************ BUILD COMPLETE ************************************"
 	@echo "****************************************************************************"

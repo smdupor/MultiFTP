@@ -22,15 +22,25 @@ std::mutex packet_lock;
  * @param logfile The path to the CSV log file used to store timing data for running latency experiments
  * @param verbose Turn on or off verbose mode, where more CLI interaction is printed when on.
  */
-MftpClient::MftpClient(std::string &addr_reg_serv, std::string &logfile, bool verbose) {
-   //reg_serv = (const char *) addr_reg_serv.c_str();
+MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &logfile, int port, bool verbose) {
    log = logfile;
-   //lock = false;
    debug = verbose;
    start_time = (const time_t) std::time(nullptr);
-  // cookie = -1;
    system_on = true;
-   //milliseconds_slept = 0;
+   system_port = port;
+
+   //inbound_socket = create_inbound_UDP_socket(port);
+
+   for(std::string &serv : remote_server_list) {
+      struct sockaddr_in remote_addr;
+      bzero((char *) &remote_addr, sizeof(remote_addr));
+
+      remote_addr.sin_family = AF_INET;
+      remote_addr.sin_addr.s_addr = inet_addr(serv.c_str());
+      remote_addr.sin_port = port;
+
+      remote_hosts.push_back(RemoteClient((sockaddr *) &remote_addr));
+   }
 }
 
 /**
@@ -44,11 +54,50 @@ MftpClient::~MftpClient() {
  * the Client.
  * @param config_file Path to the configuration file
  */
-void MftpClient::start(std::string config_file) {
-
-   // Record (now) as the local start-up time, and first entry in the logs list.
+void MftpClient::start() {
    local_time_logs.push_back(LogItem(0));
+
+   int sockfd = create_inbound_UDP_socket(system_port);
+
+   char buffer[1024];
+   bzero(buffer, 1024);
+
+   std::string out_msg = "Testing a remote msg";
+
+   int n = recvfrom(sockfd, (char *) buffer, 1024, MSG_WAITALL, (struct sockaddr *) remote_hosts.begin()->address,
+           (socklen_t *)sizeof(remote_hosts.begin()->address) );
+
+   buffer[n] = '\0';
+   std::cout << buffer <<std::endl;
+   out_msg = "Sending a reply msg";
+   sendto(sockfd, out_msg.c_str(), 1024, MSG_CONFIRM, (const struct sockaddr *) remote_hosts.begin()->address,
+           (socklen_t) sizeof(remote_hosts.begin()->address) );
+   close(sockfd);
 }
+
+void MftpClient::start_reversed() {
+   local_time_logs.push_back(LogItem(0));
+
+   int sockfd = create_inbound_UDP_socket(system_port);
+
+   char buffer[1024];
+   bzero(buffer, 1024);
+
+   std::string out_msg = "Testing a backward remote msg";
+
+   out_msg = "Sending a mesage";
+   sendto(sockfd, out_msg.c_str(), 1024, MSG_CONFIRM, (const struct sockaddr *) remote_hosts.begin()->address,
+          (socklen_t) sizeof(remote_hosts.begin()->address) );
+
+   int n = recvfrom(sockfd, (char *) buffer, 1024, MSG_WAITALL, (struct sockaddr *) remote_hosts.begin()->address,
+                    (socklen_t *)sizeof(remote_hosts.begin()->address) );
+
+   buffer[n] = '\0';
+   std::cout << buffer<<std::endl;
+
+   close(sockfd);
+}
+
 
 /**
  * Load and parse each file to ensure it's valid, and to record the length in bytes.
@@ -240,7 +289,7 @@ void MftpClient::write_time_log() {
 
 /**
  * Called when client has decided to leave the system. Mark system_on as false, Contact the registration server to leave,
- * and use callback from the registration server to unblock the listener in the main() thread.
+ * and use callback from the registration server to unblock the create_inbound_UDP_socket in the main() thread.
  */
 void MftpClient::shutdown_system() {
    system_on = false;
@@ -255,7 +304,7 @@ void MftpClient::shutdown_system() {
 
 /** Getter for system state
  *
- * @return true when system is still running, false when client has left the system. Used to break listener loop in main()
+ * @return true when system is still running, false when client has left the system. Used to break create_inbound_UDP_socket loop in main()
  */
 bool MftpClient::get_system_on() {
    return system_on;

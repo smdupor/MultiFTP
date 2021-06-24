@@ -41,12 +41,24 @@ struct LogItem {
    size_t qty;
 };
 
+struct RemoteClient {
+   explicit RemoteClient(sockaddr *addr) {
+      this->address = addr;
+      segment_num = -1;
+      ack_num = -1;
+   }
+   sockaddr *address;
+   int segment_num, ack_num;
+};
 
 class MftpClient : public UDP_Communicator {
 
 private:
    std::string hostname, path_prefix;
    std::list<LogItem> local_time_logs;
+   std::vector<RemoteClient> remote_hosts;
+
+   int inbound_socket, system_port;
 
    // Inline these for performance optimization
    inline void check_files();
@@ -56,9 +68,10 @@ private:
    void shutdown_system();
 
 public:
-   MftpClient(std::string &addr_reg_server, std::string &logfile, bool verbose);
+   MftpClient(std::list<std::string> &server_list, std::string &logfile, int port, bool verbose);
    ~MftpClient() override;
-   void start(std::string config_file);
+   void start();
+   void start_reversed();
    bool get_system_on();
 
 };

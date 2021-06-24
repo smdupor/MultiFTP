@@ -9,16 +9,16 @@
 
 #include "MftpClient.h"
 
-void initialization_interaction(int argc, char *const *argv, char &choose, bool &verbosity, std::string &server_id);
+//void initialization_interaction(int argc, char *const *argv, char &choose, bool &verbosity, std::string &server_id);
 
 int main(int argc, char *argv[]) {
   std::list<std::string> remotes;
-   remotes.push_back("192.168.1.31");
+   remotes.push_back("192.168.1.109");
    std::string logfile = "nologfile";
 
    MftpClient client = MftpClient(remotes, logfile, 65432, false);
 
-   client.start();
+   client.start_reversed();
   /* if(argc < 3) {
       UDP_Communicator::error("INVALID ARGUMENTS. Run command as: ./Client <letter code> <Registration Server Hostname>, "
                                  "e.g. './Client a 192.168.1.31\n");
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 		return EXIT_SUCCESS;
 }
 
-void initialization_interaction(int argc, char *const *argv, char &choose, bool &verbosity, std::string &server_id) {
+//void initialization_interaction(int argc, char *const *argv, char &choose, bool &verbosity, std::string &server_id) {
    /*choose= argv[1][0];
    verbosity= false;
    server_id= std::string(argv[2]);
@@ -110,4 +110,4 @@ void initialization_interaction(int argc, char *const *argv, char &choose, bool 
    if (argc == 4 && argv[3][0] == 'v'){
       verbosity = true;
    }*/
-}
+//}
