@@ -41,7 +41,7 @@ MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &
       bcopy((char *) server->h_addr, (char *) &remote_addr->sin_addr.s_addr, server->h_length);
       remote_addr->sin_port = htons(port);
 
-      remote_hosts.push_back(RemoteClient((sockaddr_in *) remote_addr));
+      remote_hosts.push_back(RemoteHost((sockaddr_in *) remote_addr));
    }
 }
 
@@ -49,57 +49,14 @@ MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &
  * System destructor.
  */
 MftpClient::~MftpClient() {
-   for(RemoteClient &r : remote_hosts){
+   for(RemoteHost &r : remote_hosts){
       free(r.address);
    }
 }
 
-/** Initialization method that registers with the Reg. Server to determine public-facing IP and finishes setting up
- * the Client.
- * @param config_file Path to the configuration file
- */
+
+// RUNS ON "client"
 void MftpClient::start() {
-   local_time_logs.push_back(LogItem(0));
-
-   int sockfd = create_inbound_UDP_socket(system_port);
-
-   char buffer[1024];
-   bzero(buffer, 1024);
-
-   std::string out_msg = "Testing a remote msg";
-
-   struct sockaddr_in cli_addr;
-   bzero(&cli_addr, sizeof(cli_addr));
-
-   error("About to receive\n");
-   //for(RemoteClient &r : remote_hosts) {
-      socklen_t length = sizeof(cli_addr);
-
-      int n = recvfrom(sockfd, (char *) buffer, 1024, 0, (struct sockaddr *) &cli_addr, &length);
-      error("received\n");
-
-      buffer[n] = '\0';
-      std::cout << buffer<<std::endl;
-
-   out_msg = "OvernetSending a reply msg";
-   sendto(sockfd, out_msg.c_str(), strlen(out_msg.c_str()), 0, (const struct sockaddr *) &cli_addr, length);
-   std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
- //  }
-
-/*   int n = recvfrom(sockfd, (char *) buffer, 1024, MSG_WAITALL, (struct sockaddr *) remote_hosts.begin()->address,
-           (socklen_t *)sizeof(remote_hosts.begin()->address) );
-
-   buffer[n] = '\0';
-   std::cout << buffer <<std::endl;
-   out_msg = "Sending a reply msg";
-   sendto(sockfd, out_msg.c_str(), 1024, MSG_CONFIRM, (const struct sockaddr *) remote_hosts.begin()->address,
-           (socklen_t) sizeof(remote_hosts.begin()->address) );*/
-   close(sockfd);
-}
-
-// RUNS ON "SERVER"
-void MftpClient::start_reversed() {
    local_time_logs.push_back(LogItem(0));
 
    int sockfd = create_outbound_UDP_socket(system_port);
@@ -111,7 +68,7 @@ void MftpClient::start_reversed() {
 
    out_msg = "OvernetSending a mesage";
 
-   for(RemoteClient &r : remote_hosts) {
+   for(RemoteHost &r : remote_hosts) {
    // std::cout << std::to_string((int) r.address->sin_addr.s_addr);
 
 

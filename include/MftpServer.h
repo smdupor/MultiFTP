@@ -1,8 +1,9 @@
-/**
- */
+﻿//
+// Created by smdupor on 6/25/21.
+//
 
-#ifndef INCLUDE_MFTPCLIENT_H_
-#define INCLUDE_MFTPCLIENT_H_
+#ifndef MULTIFTP_MFTPSERVER_H
+#define MULTIFTP_MFTPSERVER_H
 
 #include <iostream>
 #include <cstring>
@@ -27,34 +28,18 @@
 
 #include "UDP_Communicator.h"
 
-
-
-
-
-
-class MftpClient : public UDP_Communicator {
+class MftpServer : public UDP_Communicator {
 
 private:
-   std::string hostname, path_prefix;
    std::list<LogItem> local_time_logs;
    std::vector<RemoteHost> remote_hosts;
 
    int inbound_socket, system_port;
-
-   // Inline these for performance optimization
-   inline void check_files();
-
-   void write_time_log();
-   //void downloader_backoff(size_t past_local_qty, int &backoff_time);
-   void shutdown_system();
-
 public:
-   MftpClient(std::list<std::string> &server_list, std::string &logfile, int port, bool verbose);
-   ~MftpClient() override;
+   MftpServer(std::list<std::string> &server_list, std::string &logfile, int port, bool verbose);
+   ~MftpServer() override;
    void start();
-
-   bool get_system_on();
-
 };
 
-#endif /* INCLUDE_MFTPCLIENT_H_ */
+
+#endif //MULTIFTP_MFTPSERVER_H

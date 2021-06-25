@@ -7,7 +7,7 @@
 #include <iostream>
 #include <thread>
 
-#include "MftpClient.h"
+#include "MftpServer.h"
 
 //void initialization_interaction(int argc, char *const *argv, char &choose, bool &verbosity, std::string &server_id);
 
@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
    remotes.push_back("192.168.1.31");
    std::string logfile = "nologfile";
 
-   MftpClient client = MftpClient(remotes, logfile, 65432, false);
+   MftpServer client = MftpServer(remotes, logfile, 65432, false);
 
    client.start();
   /* if(argc < 3) {

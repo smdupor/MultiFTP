@@ -25,12 +25,37 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctime>
+#include <netinet/in.h>
+#include <chrono>
 
 // Hold information about a socket
 struct sockinfo {
 		int socket;
 		char * cli_addr;
 	};
+
+struct RemoteHost {
+   explicit RemoteHost(sockaddr_in *addr) {
+      this->address = addr;
+      segment_num = -1;
+      ack_num = -1;
+   }
+   sockaddr_in *address;
+   int segment_num, ack_num, sockfd;
+};
+
+/**
+ * Encapsulate a datapoint for an accurate time value.
+ */
+struct LogItem {
+   // On creation, log the immediate (steady) time and the input quantity
+   explicit LogItem(size_t qty) {
+      this->qty = qty;
+      this->time = std::chrono::steady_clock::now();
+   }
+   std::chrono::steady_clock::time_point time;
+   size_t qty;
+};
 
 class UDP_Communicator{
 
