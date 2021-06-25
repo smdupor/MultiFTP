@@ -16,6 +16,8 @@ MftpServer::MftpServer(std::string &file_path, std::string &logfile, int port, b
 
    inbound_socket = create_inbound_UDP_socket(port);
 
+   this->loss_probability =loss_probability * 100;
+
    remote_sock_addr = new sockaddr_in;
    bzero((char *) remote_sock_addr, sizeof(*remote_sock_addr));
 
@@ -89,5 +91,8 @@ bool MftpServer::valid_pkt_type(char *buffer) {
 }
 
 bool MftpServer::probability_not_dropped() {
+   if(rand() % 100 < loss_probability)
+      return false;
    return true;
+
 }

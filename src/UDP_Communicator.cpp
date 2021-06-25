@@ -55,8 +55,15 @@ int UDP_Communicator::create_inbound_UDP_socket(int port) {
 int UDP_Communicator::create_outbound_UDP_socket(int port) {
    int sockfd; // socket descriptor
 
+
+   struct timeval socket_timeout;
+   socket_timeout.tv_sec = 0;
+   socket_timeout.tv_usec = 10;
+
+
    // Create the socket
    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+   setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &socket_timeout, sizeof socket_timeout);
    if (sockfd < 0) {
       error("ERROR opening socket");
       return -1;

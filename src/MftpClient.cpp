@@ -87,7 +87,8 @@ void MftpClient::rdt_send(char data) {
       ++byte_index;
    }
    else { // packet is full of data, transmit
-      ++ack_num; // We are expecting acks with number, NEXT packet.
+      if(ack_num == seq_num)
+         ++ack_num; // We are expecting acks with number, NEXT packet.
 
       // Compute the values
       encode_seq_num(seq_num);
@@ -110,34 +111,35 @@ void MftpClient::rdt_send(char data) {
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
       //warning(out_buffer);
       // Wait for acks while timer unexpired
-      while(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() -
-            timeout_start).count() <= 5) {
-         if(all_acked())
-            break;
+
+      while(!all_acked()) {
+         // Check to see if new acks have come in
          for(RemoteHost &r : remote_hosts){
             if(r.ack_num == seq_num) {
                bzero(in_buffer, MSG_LEN);
                socklen_t length = sizeof(&*r.address);
                int n = recvfrom(r.sockfd, (char *) in_buffer, MSG_LEN, 0, (struct sockaddr *) &*r.address,
                                 &length);
-               //////////////// TODO Getting  a -1 on receive from when ack returns. maybe length() isuse?
-
                if(n>0){
                   uint16_t temp = decode_seq_num();
                   if(temp == seq_num+1)
                      r.ack_num = temp;
-                     ++r.segment_num;
+                  ++r.segment_num;
+               }
+            }
+         }
+         // If we've hit a timeout condition, resend to any hosts that haven't acked
+         if(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() -
+                                                             timeout_start).count() >= 1) {
+            for (RemoteHost &r : remote_hosts) {
+               // This packet is not yet acked from this host, re-send it
+               if(r.ack_num == seq_num) {
+                  sendto(r.sockfd, out_buffer, MSS + 8, 0, (const struct sockaddr *) &*r.address,
+                         (socklen_t) sizeof(*r.address));
                }
             }
          }
       }
-      if(!all_acked()) {
-         rdt_send(' ');
-         return; // Ensure that only the top recursive copy will increment the seqnum and reset the buffer
-      }
-      // If not all acks, call self again
-
-
 
       // If all acks, reset buffer, increment seqnum, and call self again to fill first byte
       byte_index = 0;

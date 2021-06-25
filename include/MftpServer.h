@@ -36,7 +36,7 @@ private:
    struct sockaddr_in *remote_sock_addr;
    std::string filename;
    int inbound_socket, system_port;
-   float loss_probability;
+   int loss_probability;
 
    char buffer[1500];
 
