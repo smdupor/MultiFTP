@@ -12,8 +12,9 @@
 //void initialization_interaction(int argc, char *const *argv, char &choose, bool &verbosity, std::string &server_id);
 
 int main(int argc, char *argv[]) {
-   std::string file_path = "Downloads/rfc9026.txt";
+   std::string file_path = "rfc9026.txt";
    std::string logfile = "nologfile";
+
 
    MftpServer server = MftpServer(file_path, logfile, 65432, false, 0.0);
 

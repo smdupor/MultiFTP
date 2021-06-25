@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <thread>
 
 #include "MftpClient.h"
@@ -16,10 +17,21 @@ int main(int argc, char *argv[]) {
    remotes.push_back("192.168.1.31");
    std::string logfile = "nologfile";
    std::string file_name = "rfc9026.txt";
-   MftpClient client = MftpClient(remotes, logfile, 65432, false, 500);
+   uint16_t max_seg = 500;
+   char f_in;
+
+
+   MftpClient client = MftpClient(remotes, logfile, 65432, false, max_seg);
 
    client.start();
-   client.rdt_send();
+   std::ifstream fd(file_name);
+   while(fd >> std::noskipws >> f_in) {
+      client.rdt_send(f_in);
+   }
+   fd.close();
+
+   client.shutdown();
+
 
   /* if(argc < 3) {
       UDP_Communicator::error("INVALID ARGUMENTS. Run command as: ./Client <letter code> <Registration Server Hostname>, "

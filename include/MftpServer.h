@@ -34,7 +34,7 @@ private:
    std::list<LogItem> local_time_logs;
   // std::vector<RemoteHost> remote_hosts;
    struct sockaddr_in *remote_sock_addr;
-
+   std::string filename;
    int inbound_socket, system_port;
    float loss_probability;
 
@@ -46,6 +46,7 @@ private:
    bool probability_not_dropped();
 
 public:
+
    MftpServer(std::string &file_path, std::string &logfile, int port, bool verbose, float loss_probability);
    ~MftpServer() override;
    void start();

@@ -47,7 +47,9 @@ MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &
       remote_addr->sin_port = htons(port);
 
       remote_hosts.push_back(RemoteHost((sockaddr_in *) remote_addr));
+
    }
+   sockfd = create_outbound_UDP_socket(system_port);
 }
 
 /**
@@ -57,39 +59,64 @@ MftpClient::~MftpClient() {
    for(RemoteHost &r : remote_hosts){
       free(r.address);
    }
+   close(sockfd);
+}
+
+void MftpClient::shutdown() {
+
+   MSS=byte_index;
+   rdt_send(' ');
+
+   bzero(out_buffer, MSG_LEN);
+   encode_seq_num(0xFFFFFFFF);
+   for (RemoteHost &r : remote_hosts) {
+      sendto(sockfd, out_buffer, MSS, 0, (const struct sockaddr *) &*r.address,
+             (socklen_t) sizeof(*r.address));
+   }
+   //TODO Say BYE
+   close(sockfd);
 }
 
 
-void MftpClient::rdt_send() {
-   int sockfd = create_outbound_UDP_socket(system_port);
+void MftpClient::rdt_send(char data) {
+   if(byte_index < MSS){
+      out_buffer[byte_index+8] = data;
 
-   std::string out_msg;
-   for(uint32_t i=0;i<50;++i) {
-      bzero(out_buffer, MSG_LEN);
+      // compute checksum so-far
+      ++byte_index;
+   }
+   else { // packet is full of data, transmit
+      ++ack_num; // We are expecting acks with number, NEXT packet.
 
-      out_msg = "Sending an encoded message number: " + std::to_string(i);
-
-      //bcopy(out_msg.c_str(), buffer, strlen(out_msg.c_str()));
-      memcpy(out_buffer+8, out_msg.c_str(), out_msg.length());
-
-      encode_seq_num(i);
+      // Compute the values
+      encode_seq_num(seq_num);
       encode_packet_type(DATA_PACKET);
       encode_checksum();
 
+      //TODO Set a timer
+
+      // Send the packet
       for (RemoteHost &r : remote_hosts) {
-         sendto(sockfd, out_buffer, 50, 0, (const struct sockaddr *) &*r.address,
+         sendto(sockfd, out_buffer, MSS+8, 0, (const struct sockaddr *) &*r.address,
                 (socklen_t) sizeof(*r.address));
 
-         //int n = recvfrom(sockfd, (char *) buffer, 1024, 0, (struct sockaddr *) r.address,
-           //               (socklen_t *) sizeof(r.address));
-
-         //buffer[n] = '\0';
-         warning(std::string(out_buffer+8));
-
-         std::this_thread::sleep_for(std::chrono::milliseconds(50));
       }
+      //temp prevent flooding for test
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      warning(out_buffer);
+      // Wait for acks while timer unexpired
+
+      // If not all acks, call self again
+
+      // If all acks, reset buffer, increment seqnum, and call self again to fill first byte
+      byte_index = 0;
+      bzero(out_buffer, MSG_LEN);
+      ++seq_num;
+      rdt_send(data);
    }
-   close(sockfd);
+
+
+
 }
 
 // RUNS ON "client"

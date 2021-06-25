@@ -34,7 +34,7 @@ private:
    std::list<LogItem> local_time_logs;
    std::vector<RemoteHost> remote_hosts;
    uint16_t MSS, byte_index;
-   int inbound_socket, system_port;
+   int sockfd, system_port;
 
    // Inline these for performance optimization
    inline void check_files();
@@ -48,8 +48,9 @@ public:
               uint16_t max_seg_size);
    ~MftpClient() override;
    void start();
-   void rdt_send();
+   void rdt_send(char data);
    bool get_system_on();
+   void shutdown();
 
 };
 
