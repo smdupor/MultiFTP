@@ -99,7 +99,7 @@ void MftpClient::rdt_send(char data) {
       // Send the packet
       for (RemoteHost &r : remote_hosts) {
          // This packet is not yet acked, send
-         if(r.ack_num == r.segment_num) {
+         if(r.ack_num == seq_num) {
             sendto(r.sockfd, out_buffer, MSS + 8, 0, (const struct sockaddr *) &*r.address,
                    (socklen_t) sizeof(*r.address));
 
@@ -115,16 +115,18 @@ void MftpClient::rdt_send(char data) {
          if(all_acked())
             break;
          for(RemoteHost &r : remote_hosts){
-            if(r.ack_num == r.segment_num) {
+            if(r.ack_num == seq_num) {
                bzero(in_buffer, MSG_LEN);
+               socklen_t length = sizeof(&*r.address);
                int n = recvfrom(r.sockfd, (char *) in_buffer, MSG_LEN, 0, (struct sockaddr *) &*r.address,
-                                (socklen_t *) sizeof(*r.address));
+                                &length);
                //////////////// TODO Getting  a -1 on receive from when ack returns. maybe length() isuse?
 
                if(n>0){
                   uint16_t temp = decode_seq_num();
-                  if(temp == r.segment_num+1)
+                  if(temp == seq_num+1)
                      r.ack_num = temp;
+                     ++r.segment_num;
                }
             }
          }
@@ -151,7 +153,7 @@ void MftpClient::rdt_send(char data) {
 bool MftpClient::all_acked() {
    for(RemoteHost &r : remote_hosts){
       // If this host's most recent ack is equal to the segment we're working on
-      if(r.ack_num == r.segment_num)
+      if(r.ack_num == seq_num)
          return false;
    }
    // all acks are received.
