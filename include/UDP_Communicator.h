@@ -56,6 +56,7 @@ protected:
 public:
 	virtual ~UDP_Communicator();
    int create_inbound_UDP_socket(int port);
+   int create_outbound_UDP_socket(int port);
    int get_port();
 
    //Externally-accessible print methods (used in int main()s)

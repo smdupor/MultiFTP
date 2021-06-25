@@ -46,7 +46,26 @@ int UDP_Communicator::create_inbound_UDP_socket(int port) {
    return sockfd;
 }
 
+/**
+ * Establish a listening TCP socket on this host.
+ *
+ * @param listen_port Port to listen on
+ * @return a socket file descriptor for the listening socket
+ */
+int UDP_Communicator::create_outbound_UDP_socket(int port) {
+   int sockfd; // socket descriptor
 
+   // Create the socket
+   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+   if (sockfd < 0) {
+      error("ERROR opening socket");
+      return -1;
+   }
+
+   // Listen for new connections
+   verbose("Outgoing Socket established on port: " + std::to_string(port));
+   return sockfd;
+}
 
 /**
  * Establish a call-out connection from me to 'hostname' on 'port'
