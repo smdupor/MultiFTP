@@ -22,12 +22,17 @@ std::mutex packet_lock;
  * @param logfile The path to the CSV log file used to store timing data for running latency experiments
  * @param verbose Turn on or off verbose mode, where more CLI interaction is printed when on.
  */
-MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &logfile, int port, bool verbose) {
+MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &logfile, int port, bool verbose,
+                       uint16_t max_seg_size) {
    log = logfile;
    debug = verbose;
    start_time = (const time_t) std::time(nullptr);
    system_on = true;
    system_port = port;
+   seq_num = 0;
+   ack_num = 0;
+   MSS = max_seg_size;
+   byte_index = 0;
 
    //inbound_socket = create_inbound_UDP_socket(port);
 
@@ -55,37 +60,43 @@ MftpClient::~MftpClient() {
 }
 
 
+void MftpClient::rdt_send() {
+   int sockfd = create_outbound_UDP_socket(system_port);
+
+   std::string out_msg;
+   for(uint32_t i=0;i<50;++i) {
+      bzero(out_buffer, MSG_LEN);
+
+      out_msg = "Sending an encoded message number: " + std::to_string(i);
+
+      //bcopy(out_msg.c_str(), buffer, strlen(out_msg.c_str()));
+      memcpy(out_buffer+8, out_msg.c_str(), out_msg.length());
+
+      encode_seq_num(i);
+      encode_packet_type(DATA_PACKET);
+      encode_checksum();
+
+      for (RemoteHost &r : remote_hosts) {
+         sendto(sockfd, out_buffer, 50, 0, (const struct sockaddr *) &*r.address,
+                (socklen_t) sizeof(*r.address));
+
+         //int n = recvfrom(sockfd, (char *) buffer, 1024, 0, (struct sockaddr *) r.address,
+           //               (socklen_t *) sizeof(r.address));
+
+         //buffer[n] = '\0';
+         warning(std::string(out_buffer+8));
+
+         std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      }
+   }
+   close(sockfd);
+}
+
 // RUNS ON "client"
 void MftpClient::start() {
    local_time_logs.push_back(LogItem(0));
 
-   int sockfd = create_outbound_UDP_socket(system_port);
 
-   char buffer[1024];
-   bzero(buffer, 1024);
-
-   std::string out_msg = "Testing a backward remote msg";
-
-   out_msg = "OvernetSending a mesage";
-
-   for(RemoteHost &r : remote_hosts) {
-   // std::cout << std::to_string((int) r.address->sin_addr.s_addr);
-
-
-
-      sendto(sockfd, out_msg.c_str(), out_msg.length()+1, 0, (const struct sockaddr *) &*r.address, (socklen_t) sizeof(*r.address));
-      std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
-      //std::cout << std::to_string((int) r.address->sin_addr.s_addr);
-
-   int n = recvfrom(sockfd, (char *) buffer, 1024, 0, (struct sockaddr *) r.address,
-                    (socklen_t *)sizeof(r.address) );
-
-   buffer[n] = '\0';
-   std::cout << buffer<<std::endl;
-   }
-
-   close(sockfd);
 }
 
 

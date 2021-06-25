@@ -27,18 +27,13 @@
 
 #include "UDP_Communicator.h"
 
-
-
-
-
-
 class MftpClient : public UDP_Communicator {
 
 private:
    std::string hostname, path_prefix;
    std::list<LogItem> local_time_logs;
    std::vector<RemoteHost> remote_hosts;
-
+   uint16_t MSS, byte_index;
    int inbound_socket, system_port;
 
    // Inline these for performance optimization
@@ -49,10 +44,11 @@ private:
    void shutdown_system();
 
 public:
-   MftpClient(std::list<std::string> &server_list, std::string &logfile, int port, bool verbose);
+   MftpClient(std::list<std::string> &server_list, std::string &logfile, int port, bool verbose,
+              uint16_t max_seg_size);
    ~MftpClient() override;
    void start();
-
+   void rdt_send();
    bool get_system_on();
 
 };

@@ -13,12 +13,14 @@ void initialization_interaction(int argc, char *const *argv, char &choose, bool 
 
 int main(int argc, char *argv[]) {
   std::list<std::string> remotes;
-   remotes.push_back("192.168.1.109");
+   remotes.push_back("192.168.1.31");
    std::string logfile = "nologfile";
-
-   MftpClient client = MftpClient(remotes, logfile, 65432, false);
+   std::string file_name = "rfc9026.txt";
+   MftpClient client = MftpClient(remotes, logfile, 65432, false, 500);
 
    client.start();
+   client.rdt_send();
+
   /* if(argc < 3) {
       UDP_Communicator::error("INVALID ARGUMENTS. Run command as: ./Client <letter code> <Registration Server Hostname>, "
                                  "e.g. './Client a 192.168.1.31\n");

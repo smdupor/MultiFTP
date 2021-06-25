@@ -61,8 +61,9 @@ class UDP_Communicator{
 
 protected:
 
-   static const int MSG_LEN = 1024; // TODO: Get rid of this constant, needs to be come variable
-
+   static const int MSG_LEN = 1500; // TODO: Get rid of this constant, needs to be come variable
+   char in_buffer[MSG_LEN], out_buffer[MSG_LEN];
+   uint32_t seq_num, ack_num;
 	std::string log;
 	int port;
 	bool debug, system_on;
@@ -76,6 +77,16 @@ protected:
 
    // Utility methods
    std::vector<std::string> split(const std::string &input, char delim);
+
+   enum {DATA_PACKET = 1, ACK = 2};
+
+   uint32_t decode_seq_num();
+   uint16_t decode_checksum();
+   uint16_t decode_packet_type();
+
+   void encode_seq_num(uint32_t seqnum);
+   void encode_checksum();
+   void encode_packet_type(int type);
 
 
 public:

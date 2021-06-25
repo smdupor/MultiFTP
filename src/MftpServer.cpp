@@ -5,36 +5,26 @@
 
 #include "MftpServer.h"
 
-MftpServer::MftpServer(std::list<std::string> &remote_server_list, std::string &logfile, int port, bool verbose) {
+MftpServer::MftpServer(std::string &file_path, std::string &logfile, int port, bool verbose, float loss_probability) {
    log = logfile;
    debug = verbose;
    start_time = (const time_t) std::time(nullptr);
    system_on = true;
    system_port = port;
+   seq_num = 0;
+   ack_num = 0;
 
-   //inbound_socket = create_inbound_UDP_socket(port);
+   inbound_socket = create_inbound_UDP_socket(port);
 
-   for(std::string &serv : remote_server_list) {
-      struct sockaddr_in *remote_addr = new sockaddr_in;
-      bzero((char *) remote_addr, sizeof(*remote_addr));
-
-      struct hostent *server = gethostbyname(serv.c_str());
-
-      remote_addr->sin_family = AF_INET;
-      bcopy((char *) server->h_addr, (char *) &remote_addr->sin_addr.s_addr, server->h_length);
-      remote_addr->sin_port = htons(port);
-
-      remote_hosts.push_back(RemoteHost((sockaddr_in *) remote_addr));
-   }
+   remote_sock_addr = new sockaddr_in;
+   bzero((char *) remote_sock_addr, sizeof(*remote_sock_addr));
 }
 
 /**
  * System destructor.
  */
 MftpServer::~MftpServer() {
-   for(RemoteHost &r : remote_hosts){
-      free(r.address);
-   }
+   free(remote_sock_addr);
 }
 
 /** Server0-sde
@@ -42,30 +32,52 @@ MftpServer::~MftpServer() {
 void MftpServer::start() {
    local_time_logs.push_back(LogItem(0));
 
-   int sockfd = create_inbound_UDP_socket(system_port);
+}
 
-   char buffer[1024];
-   bzero(buffer, 1024);
+void MftpServer::rdt_receive() {
 
-   std::string out_msg = "Testing a remote msg";
+   int sockfd = inbound_socket;
 
    struct sockaddr_in cli_addr;
    bzero(&cli_addr, sizeof(cli_addr));
+   socklen_t length = sizeof(*remote_sock_addr);
 
-   error("About to receive\n");
-   //for(RemoteHost &r : remote_hosts) {
-   socklen_t length = sizeof(cli_addr);
+   while(true) {
+      bzero(in_buffer, MSG_LEN);
+      int n = recvfrom(sockfd, (char *) in_buffer, MSG_LEN, 0, (struct sockaddr *) &*remote_sock_addr, &length);
+      in_buffer[n] = '\0';
 
-   int n = recvfrom(sockfd, (char *) buffer, 1024, 0, (struct sockaddr *) &cli_addr, &length);
-   error("received\n");
+      error(std::string(in_buffer+8));
 
-   buffer[n] = '\0';
-   std::cout << buffer<<std::endl;
+      if(valid_seq_num(in_buffer) && valid_checksum(in_buffer) && valid_pkt_type(in_buffer) && probability_not_dropped())
+      {
+         // write and ack
+         //encode_packet_type(ACK, buffer);
+        // encode_seq_num(current_ack_num, buffer);
+      }
 
-   out_msg = "OvernetSending a reply msg";
-   sendto(sockfd, out_msg.c_str(), strlen(out_msg.c_str()), 0, (const struct sockaddr *) &cli_addr, length);
-   std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      //sendto(sockfd, out_msg.c_str(), strlen(out_msg.c_str()), 0, (const struct sockaddr *) &*remote_sock_addr, length);
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      error(std::to_string(decode_seq_num()));
+      if(decode_seq_num() >= (uint32_t ) 49)
+         break;
+   }
 
-   //}
    close(sockfd);
+}
+
+bool MftpServer::valid_seq_num(char *buffer) {
+ return  true;
+}
+
+bool MftpServer::valid_checksum(char *buffer) {
+   return true;
+}
+
+bool MftpServer::valid_pkt_type(char *buffer) {
+   return true;
+}
+
+bool MftpServer::probability_not_dropped() {
+   return true;
 }

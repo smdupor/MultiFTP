@@ -255,7 +255,7 @@ void UDP_Communicator::verbose(std::string input) {
  * @param input the string to print
  */
 void UDP_Communicator::error(std::string input) { // bright red
-   std::cout << "\033[91m" << input << "\033[0m";
+   std::cout << "\033[91m" << input << "\033[0m" << std::endl;
 }
 
 /** (system warnings)
@@ -263,7 +263,7 @@ void UDP_Communicator::error(std::string input) { // bright red
  * @param input the string to print
  */
 void UDP_Communicator::warning(std::string input) { // bright yellow
-   std::cout << "\033[93m" << input << "\033[0m";
+   std::cout << "\033[93m" << input << "\033[0m"<< std::endl;
 }
 
 /** (information messages)
@@ -271,5 +271,46 @@ void UDP_Communicator::warning(std::string input) { // bright yellow
  * @param input the string to print
  */
 void UDP_Communicator::info(std::string input) {
-   std::cout << "\033[36m" << input << "\033[0m";
+   std::cout << "\033[36m" << input << "\033[0m"<< std::endl;
+}
+
+uint32_t UDP_Communicator::decode_seq_num() {
+   return (in_buffer[3] << 24) | (in_buffer[2] << 16) | (in_buffer[1] << 8) | (in_buffer[0]);
+}
+uint16_t UDP_Communicator::decode_checksum() {
+   if(strlen(in_buffer) >= 8 && in_buffer[5] == '\xff'  & in_buffer[6] == '\xff')
+      return 1;
+}
+uint16_t UDP_Communicator::decode_packet_type() {
+   if(strlen(in_buffer) >= 8 && in_buffer[7] == '\x55' && in_buffer[8] == '\x55')
+      return DATA_PACKET;
+   else if(strlen(in_buffer) > 8 && in_buffer[7] == '\xAA' && in_buffer[8] == '\xAA')
+     return ACK;
+    else
+      return 0;
+}
+
+void UDP_Communicator::encode_seq_num(uint32_t seqnum) {
+
+   out_buffer[3] = seqnum >> 24;
+   out_buffer[2] = seqnum >> 16;
+   out_buffer[1] = seqnum >> 8;
+   out_buffer[0] = seqnum;
+
+}
+void UDP_Communicator::encode_checksum() {
+   out_buffer[4] = '\xff';
+   out_buffer[5] = '\xff';
+}
+
+// 0-4 Seqnum, 5-6 Checksum, 7-8 Type
+void UDP_Communicator::encode_packet_type(int type) {
+   if(type == DATA_PACKET) {
+      out_buffer[6] = '\x55';
+      out_buffer[7] = '\x55';
+   } else
+   {
+      out_buffer[6] = '\xAA';
+     out_buffer[7] = '\xAA';
+   }
 }
