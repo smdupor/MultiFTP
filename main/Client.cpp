@@ -15,6 +15,7 @@ void initialization_interaction(int argc, char *const *argv, char &choose, bool 
 int main(int argc, char *argv[]) {
   std::list<std::string> remotes;
    remotes.push_back("192.168.1.31");
+   remotes.push_back("192.168.1.32");
    std::string logfile = "nologfile";
    std::string file_name = "rfc9026.txt";
    uint16_t max_seg = 500;

@@ -35,9 +35,10 @@ private:
    std::vector<RemoteHost> remote_hosts;
    uint16_t MSS, byte_index;
    int sockfd, system_port;
-
+   std::chrono::time_point<std::chrono::steady_clock> timeout_start;
    // Inline these for performance optimization
    inline void check_files();
+   bool all_acked();
 
    void write_time_log();
    //void downloader_backoff(size_t past_local_qty, int &backoff_time);

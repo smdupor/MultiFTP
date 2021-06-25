@@ -29,10 +29,10 @@ all:	$(EXEC_FILES) $(OBJ_FILES_LIB)
 	@echo "Cleaning and Symlinking."
 	rm -f obj/lib/*.o
 	rm -f obj/exe/*.o
-	ssh 192.168.1.31 'rm -f /home/smdupor/Client'
 	ssh 192.168.1.31 'rm -f /home/smdupor/Server'
-	scp bin/Client 192.168.1.31:/home/smdupor/
+	ssh 192.168.1.32 'rm -f /home/smdupor/Server'
 	scp bin/Server 192.168.1.31:/home/smdupor/
+	scp bin/Server 192.168.1.32:/home/smdupor/
 	#ln -sf ./bin/Client Client
 	#Note Bindir used to say :	$(CXX) -o $@ $(subst $(BIN_DIR)/,$(OBJ_DIR_EXE)/,$@).o $(OBJ_FILES_LIB) $(HEAD_FILES) $(LDFLAGS) $(CXXFLAGS)
 	#ln -sf ./bin/RegServ RegServ

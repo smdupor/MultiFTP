@@ -45,11 +45,11 @@ MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &
       remote_addr->sin_family = AF_INET;
       bcopy((char *) server->h_addr, (char *) &remote_addr->sin_addr.s_addr, server->h_length);
       remote_addr->sin_port = htons(port);
-
-      remote_hosts.push_back(RemoteHost((sockaddr_in *) remote_addr));
+      int sockfd = create_outbound_UDP_socket(system_port);
+      remote_hosts.push_back(RemoteHost((sockaddr_in *) remote_addr, sockfd));
 
    }
-   sockfd = create_outbound_UDP_socket(system_port);
+  // sockfd = create_outbound_UDP_socket(system_port);
 }
 
 /**
@@ -59,7 +59,7 @@ MftpClient::~MftpClient() {
    for(RemoteHost &r : remote_hosts){
       free(r.address);
    }
-   close(sockfd);
+   //close(sockfd);
 }
 
 void MftpClient::shutdown() {
@@ -70,11 +70,12 @@ void MftpClient::shutdown() {
    bzero(out_buffer, MSG_LEN);
    encode_seq_num(0xFFFFFFFF);
    for (RemoteHost &r : remote_hosts) {
-      sendto(sockfd, out_buffer, MSS, 0, (const struct sockaddr *) &*r.address,
+      sendto(r.sockfd, out_buffer, MSS, 0, (const struct sockaddr *) &*r.address,
              (socklen_t) sizeof(*r.address));
+      close(r.sockfd);
    }
    //TODO Say BYE
-   close(sockfd);
+   //close(sockfd);
 }
 
 
@@ -94,19 +95,47 @@ void MftpClient::rdt_send(char data) {
       encode_checksum();
 
       //TODO Set a timer
-
+      timeout_start = std::chrono::steady_clock::now();
       // Send the packet
       for (RemoteHost &r : remote_hosts) {
-         sendto(sockfd, out_buffer, MSS+8, 0, (const struct sockaddr *) &*r.address,
-                (socklen_t) sizeof(*r.address));
+         // This packet is not yet acked, send
+         if(r.ack_num == r.segment_num) {
+            sendto(r.sockfd, out_buffer, MSS + 8, 0, (const struct sockaddr *) &*r.address,
+                   (socklen_t) sizeof(*r.address));
+
+         }
 
       }
       //temp prevent flooding for test
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      warning(out_buffer);
+      //warning(out_buffer);
       // Wait for acks while timer unexpired
+      while(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() -
+            timeout_start).count() <= 5) {
+         if(all_acked())
+            break;
+         for(RemoteHost &r : remote_hosts){
+            if(r.ack_num == r.segment_num) {
+               bzero(in_buffer, MSG_LEN);
+               int n = recvfrom(r.sockfd, (char *) in_buffer, MSG_LEN, 0, (struct sockaddr *) &*r.address,
+                                (socklen_t *) sizeof(*r.address));
+               //////////////// TODO Getting  a -1 on receive from when ack returns. maybe length() isuse?
 
+               if(n>0){
+                  uint16_t temp = decode_seq_num();
+                  if(temp == r.segment_num+1)
+                     r.ack_num = temp;
+               }
+            }
+         }
+      }
+      if(!all_acked()) {
+         rdt_send(' ');
+         return; // Ensure that only the top recursive copy will increment the seqnum and reset the buffer
+      }
       // If not all acks, call self again
+
+
 
       // If all acks, reset buffer, increment seqnum, and call self again to fill first byte
       byte_index = 0;
@@ -117,6 +146,16 @@ void MftpClient::rdt_send(char data) {
 
 
 
+}
+
+bool MftpClient::all_acked() {
+   for(RemoteHost &r : remote_hosts){
+      // If this host's most recent ack is equal to the segment we're working on
+      if(r.ack_num == r.segment_num)
+         return false;
+   }
+   // all acks are received.
+   return true;
 }
 
 // RUNS ON "client"

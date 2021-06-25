@@ -12,7 +12,7 @@ MftpServer::MftpServer(std::string &file_path, std::string &logfile, int port, b
    system_on = true;
    system_port = port;
    seq_num = 0;
-   ack_num = 0;
+   ack_num = 1;
 
    inbound_socket = create_inbound_UDP_socket(port);
 
@@ -52,20 +52,23 @@ void MftpServer::rdt_receive() {
       //in_buffer[n] = '\0';
       if(decode_seq_num() >= (uint32_t ) 0xFFFFFFFE)
          break;
-      error(std::string(in_buffer+8));
+
 
       if(valid_seq_num(in_buffer) && valid_checksum(in_buffer) && valid_pkt_type(in_buffer) && probability_not_dropped())
       {
          // write and ack
          warning(in_buffer+8);
          fd.write(in_buffer+8, strlen(in_buffer+8));
-         //encode_packet_type(ACK, buffer);
-        // encode_seq_num(current_ack_num, buffer);
+         bzero(out_buffer, MSG_LEN);
+         encode_packet_type(ACK);
+         encode_seq_num(ack_num);
+         sendto(sockfd, out_buffer, 8, 0, (const struct sockaddr *) &*remote_sock_addr, length);
+         ++ack_num;
+         ++seq_num;
       }
 
       //sendto(sockfd, out_msg.c_str(), strlen(out_msg.c_str()), 0, (const struct sockaddr *) &*remote_sock_addr, length);
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
-      error(std::to_string(decode_seq_num()));
 
    }
    fd.close();

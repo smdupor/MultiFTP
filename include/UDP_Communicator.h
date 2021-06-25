@@ -35,10 +35,11 @@ struct sockinfo {
 	};
 
 struct RemoteHost {
-   explicit RemoteHost(sockaddr_in *addr) {
+   explicit RemoteHost(sockaddr_in *addr, int sockfd) {
       this->address = addr;
-      segment_num = -1;
-      ack_num = -1;
+      this->sockfd = sockfd;
+      segment_num = 0;
+      ack_num = 0;
    }
    sockaddr_in *address;
    int segment_num, ack_num, sockfd;
