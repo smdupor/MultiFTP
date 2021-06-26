@@ -33,6 +33,9 @@ MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &
    ack_num = 0;
    MSS = max_seg_size;
    byte_index = 0;
+   timeout_us=0;
+   EstRTT = 1000000.0; // 1 Second in us
+   DevRTT = 1000000.0; // 1 Second in us
 
    bzero(out_buffer, MSG_LEN);
    bzero(in_buffer, MSG_LEN);
@@ -125,15 +128,17 @@ void MftpClient::rdt_send(char data) {
                                 &length);
                if(n>0){
                   uint16_t temp = decode_seq_num();
-                  if(temp == seq_num+1)
+                  if(temp == seq_num+1) {
                      r.ack_num = temp;
-                  ++r.segment_num;
+                     ++r.segment_num;
+                     estimate_timeout();
+                  }
                }
             }
          }
          // If we've hit a timeout condition, resend to any hosts that haven't acked
-         if(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() -
-                                                             timeout_start).count() >= 1) {
+         if(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() -
+                                                             timeout_start).count() >= timeout_us) {
             for (RemoteHost &r : remote_hosts) {
                // This packet is not yet acked from this host, re-send it
                if(r.ack_num == seq_num) {
@@ -154,6 +159,16 @@ void MftpClient::rdt_send(char data) {
 
 
 }
+
+void MftpClient::estimate_timeout() {
+   long double SampRTT = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() -
+                                                         timeout_start).count();
+   EstRTT = (0.875*EstRTT) + (0.125*SampRTT);
+   DevRTT = (0.75*DevRTT) + (0.25* abs(EstRTT - SampRTT));
+   timeout_us = (uint_fast64_t) (EstRTT + (4*DevRTT));
+   verbose("The estimated timeout is (in microsecs): " + std::to_string(timeout_us));
+}
+
 
 bool MftpClient::all_acked() {
    for(RemoteHost &r : remote_hosts){

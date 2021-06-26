@@ -36,6 +36,9 @@ private:
    uint16_t MSS, byte_index;
    int sockfd, system_port;
    std::chrono::time_point<std::chrono::steady_clock> timeout_start;
+   uint_fast64_t timeout_us;
+   long double EstRTT, DevRTT;
+
    // Inline these for performance optimization
    inline void check_files();
    bool all_acked();
@@ -43,6 +46,8 @@ private:
    void write_time_log();
    //void downloader_backoff(size_t past_local_qty, int &backoff_time);
    void shutdown_system();
+   void estimate_timeout();
+
 
 public:
    MftpClient(std::list<std::string> &server_list, std::string &logfile, int port, bool verbose,
