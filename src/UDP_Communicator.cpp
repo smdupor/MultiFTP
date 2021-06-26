@@ -285,13 +285,13 @@ uint32_t UDP_Communicator::decode_seq_num() {
    return (in_buffer[3] << 24) | (in_buffer[2] << 16) | (in_buffer[1] << 8) | (in_buffer[0]);
 }
 uint16_t UDP_Communicator::decode_checksum() {
-   if(strlen(in_buffer) >= 8 && in_buffer[5] == '\xff'  & in_buffer[6] == '\xff')
+   if(strlen(in_buffer+8) > 0 && in_buffer[5] == '\xFF'  & in_buffer[6] == '\xFF')
       return 1;
 }
 uint16_t UDP_Communicator::decode_packet_type() {
-   if(strlen(in_buffer) >= 8 && in_buffer[7] == '\x55' && in_buffer[8] == '\x55')
+   if(strlen(in_buffer + 8) > 0 && in_buffer[6] == '\x55' && in_buffer[7] == '\x55')
       return DATA_PACKET;
-   else if(strlen(in_buffer) > 8 && in_buffer[7] == '\xAA' && in_buffer[8] == '\xAA')
+   else if(strlen(in_buffer + 8) > 0 && in_buffer[6] == '\xAA' && in_buffer[7] == '\xAA')
      return ACK;
     else
       return 0;
@@ -306,8 +306,8 @@ void UDP_Communicator::encode_seq_num(uint32_t seqnum) {
 
 }
 void UDP_Communicator::encode_checksum() {
-   out_buffer[4] = '\xff';
-   out_buffer[5] = '\xff';
+   out_buffer[4] = '\xFF';
+   out_buffer[5] = '\xFF';
 }
 
 // 0-4 Seqnum, 5-6 Checksum, 7-8 Type

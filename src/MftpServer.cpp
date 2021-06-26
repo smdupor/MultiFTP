@@ -89,7 +89,9 @@ bool MftpServer::valid_checksum(char *buffer) {
 }
 
 bool MftpServer::valid_pkt_type(char *buffer) {
-   return true;
+   if(decode_packet_type() == DATA_PACKET)
+      return true;
+   return false;
 }
 
 bool MftpServer::probability_not_dropped() {
