@@ -71,15 +71,6 @@ protected:
 	bool debug, system_on;
 	std::time_t start_time;
 
-	// Socket communication
-   void transmit(int sockfd, std::string &out_message);
-   std::string receive(int sockfd);
-   int outgoing_connection(std::string hostname, int port);
-   std::string receive_no_delim(int sockfd);
-
-   // Utility methods
-   std::vector<std::string> split(const std::string &input, char delim);
-
    enum {DATA_PACKET = 1, ACK = 2};
 
    uint32_t decode_seq_num();
@@ -95,7 +86,7 @@ public:
 	virtual ~UDP_Communicator();
    int create_inbound_UDP_socket(int port);
    int create_outbound_UDP_socket(int port);
-   int get_port();
+
 
    //Externally-accessible print methods (used in int main()s)
    static void error(std::string input);

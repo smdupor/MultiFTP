@@ -32,13 +32,10 @@ class MftpServer : public UDP_Communicator {
 
 private:
    std::list<LogItem> local_time_logs;
-  // std::vector<RemoteHost> remote_hosts;
    struct sockaddr_in *remote_sock_addr;
    std::string filename;
    int inbound_socket, system_port;
    int loss_probability;
-
-   char buffer[1500];
 
    bool valid_seq_num();
    bool valid_checksum();
@@ -46,13 +43,10 @@ private:
    bool probability_not_dropped();
 
 public:
-
    MftpServer(std::string &file_path, std::string &logfile, int port, bool verbose, float loss_probability);
    ~MftpServer() override;
    void start();
    void rdt_receive();
-
-
 };
 
 
