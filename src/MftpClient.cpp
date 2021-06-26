@@ -114,7 +114,7 @@ void MftpClient::rdt_send(char data) {
 
       }
       //temp prevent flooding for test
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      //std::this_thread::sleep_for(std::chrono::milliseconds(10));
       //warning(out_buffer);
       // Wait for acks while timer unexpired
 

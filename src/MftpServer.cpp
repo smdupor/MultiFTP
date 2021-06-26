@@ -69,7 +69,7 @@ void MftpServer::rdt_receive() {
       }
 
       //sendto(sockfd, out_msg.c_str(), strlen(out_msg.c_str()), 0, (const struct sockaddr *) &*remote_sock_addr, length);
-      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      //std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
    }
    fd.close();
