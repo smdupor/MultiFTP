@@ -75,7 +75,7 @@ int UDP_Communicator::create_outbound_UDP_socket(int port) {
 }
 
 uint32_t UDP_Communicator::decode_seq_num() {
-   return (in_buffer[3] << 24) | (in_buffer[2] << 16) | (in_buffer[1] << 8) | (in_buffer[0]);
+   return ((unsigned char)in_buffer[3] << 24) | ((unsigned char)in_buffer[2] << 16) | ((unsigned char)in_buffer[1] << 8) | ((unsigned char)in_buffer[0]);
 }
 uint16_t UDP_Communicator::decode_checksum() {
    uint32_t sum = 0;
@@ -93,11 +93,15 @@ uint16_t UDP_Communicator::decode_checksum() {
       return ret_val;
 }
 uint16_t UDP_Communicator::decode_packet_type() {
-   if(strlen(in_buffer + 8) > 0 && in_buffer[6] == '\x55' && in_buffer[7] == '\x55')
+   if( in_buffer[6] == '\x55' && in_buffer[7] == '\x55')
       return DATA_PACKET;
-   else if(strlen(in_buffer + 8) > 0 && in_buffer[6] == '\xAA' && in_buffer[7] == '\xAA')
+   else if( in_buffer[6] == '\xAA' && in_buffer[7] == '\xAA')
      return ACK;
-    else
+   else if( in_buffer[6] == '\xA5' && in_buffer[7] == '\xA5')
+      return FIN;
+   else if( in_buffer[6] == '\x5A' && in_buffer[7] == '\x5A')
+      return RESET;
+   else
       return 0;
 }
 
@@ -127,13 +131,23 @@ void UDP_Communicator::encode_checksum() {
 
 // 0-4 Seqnum, 5-6 Checksum, 7-8 Type
 void UDP_Communicator::encode_packet_type(int type) {
-   if(type == DATA_PACKET) {
-      out_buffer[6] = '\x55';
-      out_buffer[7] = '\x55';
-   } else
-   {
-      out_buffer[6] = '\xAA';
-     out_buffer[7] = '\xAA';
+   switch (type) {
+      case DATA_PACKET:
+         out_buffer[6] = '\x55';
+         out_buffer[7] = '\x55';
+         break;
+      case ACK:
+         out_buffer[6] = '\xAA';
+         out_buffer[7] = '\xAA';
+         break;
+      case FIN:
+         out_buffer[6] = '\xA5';
+         out_buffer[7] = '\xA5';
+         break;
+      case RESET:
+         out_buffer[6] = '\x5A';
+         out_buffer[7] = '\x5A';
+         break;
    }
 }
 

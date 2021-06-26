@@ -42,7 +42,7 @@ void MftpServer::start() {
 void MftpServer::rdt_receive() {
 
    int sockfd = inbound_socket;
-   std::ofstream fd(filename);
+   std::ofstream fd(filename, std::ios_base::binary);
 
    struct sockaddr_in cli_addr;
    bzero(&cli_addr, sizeof(cli_addr));
@@ -52,13 +52,13 @@ void MftpServer::rdt_receive() {
       bzero(in_buffer, MSG_LEN);
       int n = recvfrom(sockfd, (char *) in_buffer, MSG_LEN, 0, (struct sockaddr *) &*remote_sock_addr, &length);
       if(n > 0) {
-         if (decode_seq_num() >= (uint32_t) 0xFFFFFFFE)
+         if (decode_packet_type() == FIN)
             break;
 
          if (valid_seq_num() && valid_checksum() && valid_pkt_type() && probability_not_dropped()) {
             // write and ack
-            warning(in_buffer + 8);
-            fd.write(in_buffer + 8, strlen(in_buffer + 8));
+            //warning(in_buffer + 8);
+            fd.write(in_buffer + 8, n-8);
             bzero(out_buffer, MSG_LEN);
             encode_packet_type(ACK);
             encode_seq_num(ack_num);
@@ -89,18 +89,22 @@ bool MftpServer::valid_checksum() {
 
    if(in_buffer[4] == a && in_buffer[5] == b)
       return true;
+   error("invalid checksum");
    return false;
 }
 
 bool MftpServer::valid_pkt_type() {
    if(decode_packet_type() == DATA_PACKET)
       return true;
+   error("Invalid packet type");
    return false;
 }
 
 bool MftpServer::probability_not_dropped() {
-   if(rand() % 100 < loss_probability)
+   if(rand() % 100 < loss_probability) {
+      error("Packet loss, sequence number = " + std::to_string(decode_seq_num()));
       return false;
+   }
    return true;
 
 }

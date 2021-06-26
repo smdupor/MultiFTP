@@ -71,7 +71,7 @@ protected:
 	bool debug, system_on;
 	std::time_t start_time;
 
-   enum {DATA_PACKET = 1, ACK = 2};
+   enum {DATA_PACKET = 1, ACK = 2, FIN = 3, RESET = 4};
 
    uint32_t decode_seq_num();
    uint16_t decode_checksum();

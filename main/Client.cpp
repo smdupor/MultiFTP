@@ -17,7 +17,9 @@ int main(int argc, char *argv[]) {
    remotes.push_back("192.168.1.31");
    remotes.push_back("192.168.1.32");
    std::string logfile = "nologfile.txt";
-   std::string file_name = "rfc9026.txt";
+   std::string file_name = "linux-2.2.1.tar.bz2";
+   //std::string file_name = "rfc9026.txt";
+
    uint16_t max_seg = 500;
    char f_in;
 
@@ -25,7 +27,7 @@ int main(int argc, char *argv[]) {
    MftpClient client = MftpClient(remotes, logfile, 65432, false, max_seg);
 
    client.start();
-   std::ifstream fd(file_name);
+   std::ifstream fd(file_name, std::ios_base::binary);
    while(fd >> std::noskipws >> f_in) {
       client.rdt_send(f_in);
    }

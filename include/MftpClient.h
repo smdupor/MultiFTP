@@ -33,6 +33,8 @@ private:
    std::vector<LogItem> local_time_logs;
    std::vector<RemoteHost> remote_hosts;
    uint16_t MSS, byte_index;
+   uint_fast32_t loss_count;
+   uint_fast64_t packet_count;
    int system_port;
    std::chrono::time_point<std::chrono::steady_clock> timeout_start;
    uint_fast64_t timeout_us;
@@ -41,6 +43,8 @@ private:
    bool all_acked();
    void write_time_log();
    void estimate_timeout();
+
+   void system_report();
 
 public:
    MftpClient(std::list<std::string> &server_list, std::string &logfile, int port, bool verbose,

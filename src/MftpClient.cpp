@@ -36,6 +36,8 @@ MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &
    timeout_us=0;
    EstRTT = 1000000.0; // 1 Second in us
    DevRTT = 1000000.0; // 1 Second in us
+   packet_count = 0;
+   loss_count = 0;
 
    bzero(out_buffer, MSG_LEN);
    bzero(in_buffer, MSG_LEN);
@@ -75,7 +77,9 @@ void MftpClient::shutdown() {
    rdt_send(' ');
 
    bzero(out_buffer, MSG_LEN);
-   encode_seq_num(0xFFFFFFFF);
+   encode_seq_num(seq_num);
+   encode_packet_type(FIN);
+
    for (RemoteHost &r : remote_hosts) {
       sendto(r.sockfd, out_buffer, MSS, 0, (const struct sockaddr *) &*r.address,
              (socklen_t) sizeof(*r.address));
@@ -141,6 +145,8 @@ void MftpClient::rdt_send(char data) {
          // If we've hit a timeout condition, resend to any hosts that haven't acked
          if(((uint_fast64_t )std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() -
                                                              timeout_start).count()) >= timeout_us) {
+            error("Timeout, sequence number = " + std::to_string(seq_num));
+            ++loss_count;
             for (RemoteHost &r : remote_hosts) {
                // This packet is not yet acked from this host, re-send it
                if(r.ack_num == seq_num) {
@@ -155,6 +161,7 @@ void MftpClient::rdt_send(char data) {
       byte_index = 0;
       bzero(out_buffer, MSG_LEN);
       ++seq_num;
+      ++packet_count;
       rdt_send(data);
    }
 
@@ -216,6 +223,7 @@ void MftpClient::write_time_log() {
       verbose(outgoing_message);
    //}
    csv_file.close();
+   system_report();
 }
 
 
@@ -225,4 +233,13 @@ void MftpClient::write_time_log() {
  */
 bool MftpClient::get_system_on() {
    return system_on;
+}
+
+void MftpClient::system_report() {
+   double percentage = (double) loss_count / (double) packet_count;
+   warning(" * * * * * * * * * * * * SYSTEM REPORT  * * * * * * * * * * * * ");
+   warning( "              Packets Transmitted: " + std::to_string(packet_count));
+   warning( "              Packets Lost       : " + std::to_string(loss_count));
+   warning( "              Effective Loss Rate: " + std::to_string(percentage));
+   warning(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ");
 }
