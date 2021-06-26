@@ -69,7 +69,8 @@ MftpClient::~MftpClient() {
 }
 
 void MftpClient::shutdown() {
-
+   // Store MSS for restoration after signaling "done".
+   uint16_t temp_mss = MSS;
    MSS=byte_index;
    rdt_send(' ');
 
@@ -80,8 +81,9 @@ void MftpClient::shutdown() {
              (socklen_t) sizeof(*r.address));
       close(r.sockfd);
    }
-   //TODO Say BYE
-   //close(sockfd);
+   local_time_logs.push_back(LogItem(1));
+   MSS = temp_mss;
+   write_time_log();
 }
 
 
@@ -356,23 +358,25 @@ void MftpClient::write_time_log() {
    std::string outgoing_message;
 
    // Grab the "zero" time and open the file
-   LogItem t = *local_time_logs.begin();
-   std::ofstream csv_file(log);
+   LogItem t = local_time_logs[0];
+   std::ofstream csv_file(log, std::ios_base::app);
 
    //Output CSV header
-   outgoing_message = "Qty, time\n";
-   verbose(outgoing_message);
-   csv_file.write(outgoing_message.c_str(), outgoing_message.length());
+   //outgoing_message = "Qty, time\n";
+   //verbose(outgoing_message);
+   //csv_file.write(outgoing_message.c_str(), outgoing_message.length());
 
    // Write each entry as a row to the CSV File, subtracting the zero time from (each) time to get elapsed (seconds)
-   for (LogItem &l : local_time_logs) {
-      outgoing_message = std::to_string(l.qty) + ", " +
+   //for (LogItem &l : local_time_logs) {
+   // Write to CSV as #Remote Hosts, MSS, Time
+      outgoing_message = std::to_string(remote_hosts.size()) + ", " +
+                         std::to_string(MSS) + ", " +
                          std::to_string(((float) std::chrono::duration_cast<std::chrono::milliseconds>(
-                                 l.time - t.time).count()) / 1000) +
+                                 local_time_logs[1].time - t.time).count()) / 1000) +
                          "\n";
       csv_file.write(outgoing_message.c_str(), outgoing_message.length());
       verbose(outgoing_message);
-   }
+   //}
    csv_file.close();
 }
 

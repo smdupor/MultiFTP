@@ -31,7 +31,7 @@ class MftpClient : public UDP_Communicator {
 
 private:
    std::string hostname, path_prefix;
-   std::list<LogItem> local_time_logs;
+   std::vector<LogItem> local_time_logs;
    std::vector<RemoteHost> remote_hosts;
    uint16_t MSS, byte_index;
    int sockfd, system_port;
