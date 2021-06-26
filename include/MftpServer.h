@@ -40,9 +40,9 @@ private:
 
    char buffer[1500];
 
-   bool valid_seq_num(char *buffer);
-   bool valid_checksum(char *buffer);
-   bool valid_pkt_type(char *buffer);
+   bool valid_seq_num();
+   bool valid_checksum();
+   bool valid_pkt_type();
    bool probability_not_dropped();
 
 public:

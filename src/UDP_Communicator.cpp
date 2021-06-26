@@ -285,8 +285,22 @@ uint32_t UDP_Communicator::decode_seq_num() {
    return (in_buffer[3] << 24) | (in_buffer[2] << 16) | (in_buffer[1] << 8) | (in_buffer[0]);
 }
 uint16_t UDP_Communicator::decode_checksum() {
-   if(strlen(in_buffer+8) > 0 && in_buffer[5] == '\xFF'  & in_buffer[6] == '\xFF')
-      return 1;
+   uint32_t sum = 0;
+   uint16_t ret_val;
+
+
+   size_t len = MSG_LEN;
+   for(int i = 8; i <len;++i){
+      sum += (unsigned char) in_buffer[i];
+   }
+
+   sum = (sum & 0xFFFF) + (sum >> 16);
+   sum = (sum & 0xFFFF) + (sum >> 16);
+   warning(std::to_string(sum));
+   ret_val = sum & 0xFFFF;
+   info(std::to_string(ret_val));
+
+      return ret_val;
 }
 uint16_t UDP_Communicator::decode_packet_type() {
    if(strlen(in_buffer + 8) > 0 && in_buffer[6] == '\x55' && in_buffer[7] == '\x55')
@@ -306,8 +320,22 @@ void UDP_Communicator::encode_seq_num(uint32_t seqnum) {
 
 }
 void UDP_Communicator::encode_checksum() {
-   out_buffer[4] = '\xFF';
-   out_buffer[5] = '\xFF';
+   uint32_t sum = 0;
+   size_t len = MSG_LEN;
+   for(int i = 8; i <len;++i){
+      sum += (unsigned char) out_buffer[i];
+   }
+
+   sum = (sum & 0xFFFF) + (sum >> 16);
+   sum = (sum & 0xFFFF) + (sum >> 16);
+
+   error(std::to_string(sum));
+
+   uint16_t clipped_sum = sum & 0xFFFF;
+   warning(std::to_string(clipped_sum));
+
+   out_buffer[4] = clipped_sum >> 8;
+   out_buffer[5] = clipped_sum;
 }
 
 // 0-4 Seqnum, 5-6 Checksum, 7-8 Type

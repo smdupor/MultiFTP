@@ -34,6 +34,9 @@ MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &
    MSS = max_seg_size;
    byte_index = 0;
 
+   bzero(out_buffer, MSG_LEN);
+   bzero(in_buffer, MSG_LEN);
+
    //inbound_socket = create_inbound_UDP_socket(port);
 
    for(std::string &serv : remote_server_list) {

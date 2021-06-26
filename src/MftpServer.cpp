@@ -56,7 +56,7 @@ void MftpServer::rdt_receive() {
          break;
 
 
-      if(valid_seq_num(in_buffer) && valid_checksum(in_buffer) && valid_pkt_type(in_buffer) && probability_not_dropped())
+      if(valid_seq_num() && valid_checksum() && valid_pkt_type() && probability_not_dropped())
       {
          // write and ack
          warning(in_buffer+8);
@@ -78,17 +78,24 @@ void MftpServer::rdt_receive() {
    close(sockfd);
 }
 
-bool MftpServer::valid_seq_num(char *buffer) {
+bool MftpServer::valid_seq_num() {
    if(decode_seq_num() == seq_num)
       return  true;
    return false;
 }
 
-bool MftpServer::valid_checksum(char *buffer) {
-   return true;
+bool MftpServer::valid_checksum() {
+   uint16_t checksum = decode_checksum();
+   char a = checksum >> 8;
+   char b = checksum;
+   error(std::to_string(checksum));
+
+   if(in_buffer[4] == a && in_buffer[5] == b)
+      return true;
+   return false;
 }
 
-bool MftpServer::valid_pkt_type(char *buffer) {
+bool MftpServer::valid_pkt_type() {
    if(decode_packet_type() == DATA_PACKET)
       return true;
    return false;
