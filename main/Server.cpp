@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
    std::string logfile = "nologfile";
 
 
-   MftpServer server = MftpServer(file_path, logfile, 65432, false, 0.10);
+   MftpServer server = MftpServer(file_path, logfile, 65432, false, 0.05);
 
    server.start();
    server.rdt_receive();

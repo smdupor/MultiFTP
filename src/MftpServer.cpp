@@ -79,7 +79,9 @@ void MftpServer::rdt_receive() {
 }
 
 bool MftpServer::valid_seq_num(char *buffer) {
- return  true;
+   if(decode_seq_num() == seq_num)
+      return  true;
+   return false;
 }
 
 bool MftpServer::valid_checksum(char *buffer) {
