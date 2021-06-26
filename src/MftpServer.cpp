@@ -55,7 +55,6 @@ void MftpServer::rdt_receive() {
       if(decode_seq_num() >= (uint32_t ) 0xFFFFFFFE)
          break;
 
-
       if(valid_seq_num() && valid_checksum() && valid_pkt_type() && probability_not_dropped())
       {
          // write and ack
@@ -88,7 +87,6 @@ bool MftpServer::valid_checksum() {
    uint16_t checksum = decode_checksum();
    char a = checksum >> 8;
    char b = checksum;
-   error(std::to_string(checksum));
 
    if(in_buffer[4] == a && in_buffer[5] == b)
       return true;

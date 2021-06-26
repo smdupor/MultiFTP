@@ -296,10 +296,7 @@ uint16_t UDP_Communicator::decode_checksum() {
 
    sum = (sum & 0xFFFF) + (sum >> 16);
    sum = (sum & 0xFFFF) + (sum >> 16);
-   warning(std::to_string(sum));
-   ret_val = sum & 0xFFFF;
-   info(std::to_string(ret_val));
-
+   ret_val = ~(sum & 0xFFFF);
       return ret_val;
 }
 uint16_t UDP_Communicator::decode_packet_type() {
@@ -329,10 +326,7 @@ void UDP_Communicator::encode_checksum() {
    sum = (sum & 0xFFFF) + (sum >> 16);
    sum = (sum & 0xFFFF) + (sum >> 16);
 
-   error(std::to_string(sum));
-
-   uint16_t clipped_sum = sum & 0xFFFF;
-   warning(std::to_string(clipped_sum));
+   uint16_t clipped_sum = ~(sum & 0xFFFF);
 
    out_buffer[4] = clipped_sum >> 8;
    out_buffer[5] = clipped_sum;
