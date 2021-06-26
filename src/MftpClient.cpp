@@ -139,8 +139,8 @@ void MftpClient::rdt_send(char data) {
             }
          }
          // If we've hit a timeout condition, resend to any hosts that haven't acked
-         if(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() -
-                                                             timeout_start).count() >= timeout_us) {
+         if(((uint_fast64_t )std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() -
+                                                             timeout_start).count()) >= timeout_us) {
             for (RemoteHost &r : remote_hosts) {
                // This packet is not yet acked from this host, re-send it
                if(r.ack_num == seq_num) {

@@ -42,7 +42,8 @@ struct RemoteHost {
       ack_num = 0;
    }
    sockaddr_in *address;
-   int segment_num, ack_num, sockfd;
+   int sockfd;
+   uint16_t segment_num, ack_num;
 };
 
 /**
@@ -62,7 +63,7 @@ class UDP_Communicator{
 
 protected:
 
-   static const int MSG_LEN = 1500; // TODO: Get rid of this constant, needs to be come variable
+   static const int MSG_LEN = 1500;
    char in_buffer[MSG_LEN], out_buffer[MSG_LEN];
    uint32_t seq_num, ack_num;
 	std::string log;

@@ -290,7 +290,7 @@ uint16_t UDP_Communicator::decode_checksum() {
 
 
    size_t len = MSG_LEN;
-   for(int i = 8; i <len;++i){
+   for(size_t i = 8; i <len;++i){
       sum += (unsigned char) in_buffer[i];
    }
 
@@ -319,7 +319,7 @@ void UDP_Communicator::encode_seq_num(uint32_t seqnum) {
 void UDP_Communicator::encode_checksum() {
    uint32_t sum = 0;
    size_t len = MSG_LEN;
-   for(int i = 8; i <len;++i){
+   for(size_t i = 8; i <len;++i){
       sum += (unsigned char) out_buffer[i];
    }
 

@@ -51,26 +51,25 @@ void MftpServer::rdt_receive() {
    while(true) {
       bzero(in_buffer, MSG_LEN);
       int n = recvfrom(sockfd, (char *) in_buffer, MSG_LEN, 0, (struct sockaddr *) &*remote_sock_addr, &length);
-      //in_buffer[n] = '\0';
-      if(decode_seq_num() >= (uint32_t ) 0xFFFFFFFE)
-         break;
+      if(n > 0) {
+         if (decode_seq_num() >= (uint32_t) 0xFFFFFFFE)
+            break;
 
-      if(valid_seq_num() && valid_checksum() && valid_pkt_type() && probability_not_dropped())
-      {
-         // write and ack
-         warning(in_buffer+8);
-         fd.write(in_buffer+8, strlen(in_buffer+8));
-         bzero(out_buffer, MSG_LEN);
-         encode_packet_type(ACK);
-         encode_seq_num(ack_num);
-         sendto(sockfd, out_buffer, 8, 0, (const struct sockaddr *) &*remote_sock_addr, length);
-         ++ack_num;
-         ++seq_num;
+         if (valid_seq_num() && valid_checksum() && valid_pkt_type() && probability_not_dropped()) {
+            // write and ack
+            warning(in_buffer + 8);
+            fd.write(in_buffer + 8, strlen(in_buffer + 8));
+            bzero(out_buffer, MSG_LEN);
+            encode_packet_type(ACK);
+            encode_seq_num(ack_num);
+            sendto(sockfd, out_buffer, 8, 0, (const struct sockaddr *) &*remote_sock_addr, length);
+            ++ack_num;
+            ++seq_num;
+         }
+
+         //sendto(sockfd, out_msg.c_str(), strlen(out_msg.c_str()), 0, (const struct sockaddr *) &*remote_sock_addr, length);
+         //std::this_thread::sleep_for(std::chrono::milliseconds(50));
       }
-
-      //sendto(sockfd, out_msg.c_str(), strlen(out_msg.c_str()), 0, (const struct sockaddr *) &*remote_sock_addr, length);
-      //std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
    }
    fd.close();
 
