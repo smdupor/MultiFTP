@@ -96,9 +96,6 @@ void MftpClient::rdt_send(char data) {
          }
 
       }
-      //temp prevent flooding for test
-      //std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      //warning(out_buffer);
       // Wait for acks while timer unexpired
 
       while (!all_acked()) {
@@ -140,6 +137,8 @@ void MftpClient::rdt_send(char data) {
       bzero(out_buffer, MSG_LEN);
       ++seq_num;
       ++packet_count;
+      if((seq_num * MSS) % 1048576 < MSS && seq_num > 2)
+         info(std::to_string((seq_num * MSS) / 1048576) + " MiB transmitted.");
       rdt_send(data);
    }
 }
@@ -199,7 +198,9 @@ void MftpClient::system_report() {
    double percentage = (double) loss_count / (double) packet_count;
    warning(" * * * * * * * * * * * * * * * * * * SYSTEM REPORT  * * * * * * * * * * * * * * * * * * ");
    warning("                 Successful Packets Transmitted   : " + std::to_string(packet_count));
-   warning("                 System-Wide Packets Lost         : " + std::to_string(loss_count));
+   warning("                 Number of Timeout Events         : " + std::to_string(loss_count));
    warning("                 System-Wide Effective Loss Rate  : " + std::to_string(percentage));
-   warning(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ");
+   warning("                 Current Timeout Setting (s)      : " + std::to_string((double)timeout_us / 1000000));
+   warning("                 ExpMovingAvg EstimatedRTT (s)    : " + std::to_string(EstRTT / 1000000));
+   warning(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  ");
 }

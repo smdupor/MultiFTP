@@ -15,6 +15,7 @@ MftpServer::MftpServer(std::string &file_path, std::string &logfile, int port, b
    inbound_socket = create_inbound_UDP_socket(port);
    loss_count = 0;
    packet_count = 0;
+   bytes_written = 0;
    this->loss_probability = std::roundf(loss_probability * 10000);
    remote_sock_addr = new sockaddr_in;
    bzero((char *) remote_sock_addr, sizeof(*remote_sock_addr));
@@ -54,10 +55,13 @@ void MftpServer::rdt_receive() {
          if (valid_seq_num() && valid_checksum() && valid_pkt_type() && probability_not_dropped()) {
             // write and ack
             fd.write(in_buffer + 8, n - 8);
+            bytes_written += n - 8;
             bzero(out_buffer, MSG_LEN);
             encode_packet_type(ACK);
             encode_seq_num(ack_num);
             sendto(sockfd, out_buffer, 8, 0, (const struct sockaddr *) &*remote_sock_addr, length);
+            if(bytes_written % 1048576 < n && seq_num > 2)
+               info(std::to_string(bytes_written / 1000000) + " MiB received.");
             ++ack_num;
             ++seq_num;
             ++packet_count;
@@ -105,7 +109,7 @@ void MftpServer::system_report() {
    double percentage = (double) loss_count / (double) packet_count;
    warning(" * * * * * * * * * * * * * * * * * * SYSTEM REPORT  * * * * * * * * * * * * * * * * * * ");
    warning("              Local Packets Received Successfully  : " + std::to_string(packet_count));
-   warning("              Local Packets Lost                   : " + std::to_string(loss_count));
+   warning("              Packets Probabilistically Dropped    : " + std::to_string(loss_count));
    warning("              Local Configured Loss Rate           : " + std::to_string((float) loss_probability / 10000));
    warning("              Local Effective Loss Rate            : " + std::to_string(percentage));
    warning(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ");

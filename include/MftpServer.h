@@ -18,6 +18,7 @@ private:
    int inbound_socket, system_port;
    int loss_probability;
    uint_fast32_t loss_count;
+   int bytes_written;
    uint_fast64_t packet_count;
 
    bool valid_seq_num();
