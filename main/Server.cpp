@@ -14,8 +14,8 @@ int main(int argc, char *argv[]) {
    // format: ./Server portnum filename loss_probability r5
    --argc;
    // Optional argument: Repeat experiment r(this) many times
-   if(argv[argc][0] == 'r') {
-      repetitions = atoi( argv[argc]+1);
+   if (argv[argc][0] == 'r') {
+      repetitions = atoi(argv[argc] + 1);
       --argc;
    }
    std::string logfile = "Mftp_time_log.csv";
@@ -25,12 +25,12 @@ int main(int argc, char *argv[]) {
    --argc;
    int port = atoi(argv[argc]);
    --argc;
-   if(argc == -1) {
+   if (argc == -1) {
       MftpServer::error("Invalid number of arguments passed.");
       return EXIT_FAILURE;
    }
 
-   for(uint8_t i = 0; i < repetitions; ++i) {
+   for (uint8_t i = 0; i < repetitions; ++i) {
       MftpServer server = MftpServer(file_name, logfile, port, false, loss_probability);
 
       server.start();
@@ -39,5 +39,5 @@ int main(int argc, char *argv[]) {
 
    //Say goodbye and exit.
    UDP_Communicator::info("***************System is exiting successfully***********\n");
-		return EXIT_SUCCESS;
+   return EXIT_SUCCESS;
 }

@@ -75,31 +75,34 @@ int UDP_Communicator::create_outbound_UDP_socket(int port) {
 }
 
 uint32_t UDP_Communicator::decode_seq_num() {
-   return ((unsigned char)in_buffer[3] << 24) | ((unsigned char)in_buffer[2] << 16) | ((unsigned char)in_buffer[1] << 8) | ((unsigned char)in_buffer[0]);
+   return ((unsigned char) in_buffer[3] << 24) | ((unsigned char) in_buffer[2] << 16) |
+          ((unsigned char) in_buffer[1] << 8) | ((unsigned char) in_buffer[0]);
 }
+
 uint16_t UDP_Communicator::decode_checksum() {
    uint32_t sum = 0;
    uint16_t ret_val;
 
 
    size_t len = MSG_LEN;
-   for(size_t i = 8; i <len;++i){
+   for (size_t i = 8; i < len; ++i) {
       sum += (unsigned char) in_buffer[i];
    }
 
    sum = (sum & 0xFFFF) + (sum >> 16);
    sum = (sum & 0xFFFF) + (sum >> 16);
    ret_val = ~(sum & 0xFFFF);
-      return ret_val;
+   return ret_val;
 }
+
 uint16_t UDP_Communicator::decode_packet_type() {
-   if( in_buffer[6] == '\x55' && in_buffer[7] == '\x55')
+   if (in_buffer[6] == '\x55' && in_buffer[7] == '\x55')
       return DATA_PACKET;
-   else if( in_buffer[6] == '\xAA' && in_buffer[7] == '\xAA')
-     return ACK;
-   else if( in_buffer[6] == '\xA5' && in_buffer[7] == '\xA5')
+   else if (in_buffer[6] == '\xAA' && in_buffer[7] == '\xAA')
+      return ACK;
+   else if (in_buffer[6] == '\xA5' && in_buffer[7] == '\xA5')
       return FIN;
-   else if( in_buffer[6] == '\x5A' && in_buffer[7] == '\x5A')
+   else if (in_buffer[6] == '\x5A' && in_buffer[7] == '\x5A')
       return RESET;
    else
       return 0;
@@ -113,10 +116,11 @@ void UDP_Communicator::encode_seq_num(uint32_t seqnum) {
    out_buffer[0] = seqnum;
 
 }
+
 void UDP_Communicator::encode_checksum() {
    uint32_t sum = 0;
    size_t len = MSG_LEN;
-   for(size_t i = 8; i <len;++i){
+   for (size_t i = 8; i < len; ++i) {
       sum += (unsigned char) out_buffer[i];
    }
 
@@ -193,7 +197,7 @@ void UDP_Communicator::error(std::string input) { // bright red
  * @param input the string to print
  */
 void UDP_Communicator::warning(std::string input) { // bright yellow
-   std::cout << "\033[93m" << input << "\033[0m"<< std::endl;
+   std::cout << "\033[93m" << input << "\033[0m" << std::endl;
 }
 
 /** (information messages)
@@ -201,5 +205,5 @@ void UDP_Communicator::warning(std::string input) { // bright yellow
  * @param input the string to print
  */
 void UDP_Communicator::info(std::string input) {
-   std::cout << "\033[36m" << input << "\033[0m"<< std::endl;
+   std::cout << "\033[36m" << input << "\033[0m" << std::endl;
 }

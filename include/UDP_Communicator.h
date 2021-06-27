@@ -25,6 +25,7 @@ struct RemoteHost {
       segment_num = 0;
       ack_num = 0;
    }
+
    sockaddr_in *address;
    int sockfd;
    uint16_t segment_num, ack_num;
@@ -38,20 +39,23 @@ struct LogItem {
    explicit LogItem() {
       this->time = std::chrono::steady_clock::now();
    }
+
    std::chrono::steady_clock::time_point time;
 };
 
-class UDP_Communicator{
+class UDP_Communicator {
 
 protected:
 
    static const int MSG_LEN = 1500;
    char in_buffer[MSG_LEN], out_buffer[MSG_LEN];
    uint32_t seq_num, ack_num;
-	std::string log;
-	bool debug;
+   std::string log;
+   bool debug;
 
-   enum {DATA_PACKET = 1, ACK = 2, FIN = 3, RESET = 4};
+   enum {
+      DATA_PACKET = 1, ACK = 2, FIN = 3, RESET = 4
+   };
 
    uint32_t decode_seq_num();
    uint16_t decode_checksum();
@@ -63,7 +67,7 @@ protected:
 
 
 public:
-	virtual ~UDP_Communicator();
+   virtual ~UDP_Communicator();
    int create_inbound_UDP_socket(int port);
    int create_outbound_UDP_socket(int port);
 
