@@ -8,8 +8,6 @@
 MftpServer::MftpServer(std::string &file_path, std::string &logfile, int port, bool verbose, float loss_probability) {
    log = logfile;
    debug = verbose;
-   start_time = (const time_t) std::time(nullptr);
-   system_on = true;
    system_port = port;
    seq_num = 0;
    ack_num = 1;
@@ -18,12 +16,9 @@ MftpServer::MftpServer(std::string &file_path, std::string &logfile, int port, b
    loss_count = 0;
    packet_count = 0;
    this->loss_probability = std::roundf(loss_probability * 10000);
-
    remote_sock_addr = new sockaddr_in;
    bzero((char *) remote_sock_addr, sizeof(*remote_sock_addr));
-
    filename = file_path;
-   //*fd = std::ofstream(file_path);
 }
 
 /**
@@ -36,12 +31,10 @@ MftpServer::~MftpServer() {
 /** Server0-sde
  */
 void MftpServer::start() {
-   local_time_logs.push_back(LogItem(0));
-
+   local_time_logs.emplace_back(LogItem());
 }
 
 void MftpServer::rdt_receive() {
-
    int sockfd = inbound_socket;
    std::ofstream fd(filename, std::ios_base::binary);
 
@@ -58,10 +51,8 @@ void MftpServer::rdt_receive() {
             break;
          }
 
-
          if (valid_seq_num() && valid_checksum() && valid_pkt_type() && probability_not_dropped()) {
             // write and ack
-            //warning(in_buffer + 8);
             fd.write(in_buffer + 8, n-8);
             bzero(out_buffer, MSG_LEN);
             encode_packet_type(ACK);
@@ -71,13 +62,9 @@ void MftpServer::rdt_receive() {
             ++seq_num;
             ++packet_count;
          }
-
-         //sendto(sockfd, out_msg.c_str(), strlen(out_msg.c_str()), 0, (const struct sockaddr *) &*remote_sock_addr, length);
-         //std::this_thread::sleep_for(std::chrono::milliseconds(50));
       }
    }
    fd.close();
-
    close(sockfd);
 }
 

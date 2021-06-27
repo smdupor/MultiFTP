@@ -1,33 +1,13 @@
 /**
- * MftpClient.cpp
- *
- *	Contains the P2P client/server code for the file sharing nodes. Maintains the distributed index, serves files,
- *	and requests files to download from other peers.
- *
- * Subclass of NetworkCommunicator.
- *
- *  Created on: May 31, 2021
- *      Author: smdupor
  */
 
 #include "UDP_Communicator.h"
 #include "MftpClient.h"
 
-// Mutex locks to control access to the packet list to prevent data race.
-//std::mutex packet_lock;
-
-/** System constructor.
- *
- * @param addr_reg_serv The address of the registration server
- * @param logfile The path to the CSV log file used to store timing data for running latency experiments
- * @param verbose Turn on or off verbose mode, where more CLI interaction is printed when on.
- */
 MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &logfile, int port, bool verbose,
                        uint16_t max_seg_size) {
    log = logfile;
    debug = verbose;
-   start_time = (const time_t) std::time(nullptr);
-   system_on = true;
    system_port = port;
    seq_num = 0;
    ack_num = 0;
@@ -42,8 +22,6 @@ MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &
    bzero(out_buffer, MSG_LEN);
    bzero(in_buffer, MSG_LEN);
 
-   //inbound_socket = create_inbound_UDP_socket(port);
-
    for(std::string &serv : remote_server_list) {
       struct sockaddr_in *remote_addr = new sockaddr_in;
       bzero((char *) remote_addr, sizeof(*remote_addr));
@@ -54,7 +32,7 @@ MftpClient::MftpClient(std::list<std::string> &remote_server_list, std::string &
       bcopy((char *) server->h_addr, (char *) &remote_addr->sin_addr.s_addr, server->h_length);
       remote_addr->sin_port = htons(port);
       int sockfd = create_outbound_UDP_socket(system_port);
-      remote_hosts.push_back(RemoteHost((sockaddr_in *) remote_addr, sockfd));
+      remote_hosts.emplace_back(RemoteHost((sockaddr_in *) remote_addr, sockfd));
 
    }
   // sockfd = create_outbound_UDP_socket(system_port);
@@ -85,7 +63,7 @@ void MftpClient::shutdown() {
              (socklen_t) sizeof(*r.address));
       close(r.sockfd);
    }
-   local_time_logs.push_back(LogItem(1));
+   local_time_logs.emplace_back(LogItem());
    MSS = temp_mss;
    write_time_log();
 }
@@ -164,20 +142,16 @@ void MftpClient::rdt_send(char data) {
       ++packet_count;
       rdt_send(data);
    }
-
-
-
 }
 
 void MftpClient::estimate_timeout() {
    long double SampRTT = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() -
                                                          timeout_start).count();
    EstRTT = (0.875*EstRTT) + (0.125*SampRTT);
-   DevRTT = (0.75*DevRTT) + (0.25* abs(EstRTT - SampRTT));
+   DevRTT = (0.75*DevRTT) + (0.25* std::abs(EstRTT - SampRTT));
    timeout_us = (uint_fast64_t) (EstRTT + (4*DevRTT));
-   verbose("The estimated timeout is (in microsecs): " + std::to_string(timeout_us));
+   verbose("The estimated timeout istd::absin microsecs): " + std::to_string(timeout_us));
 }
-
 
 bool MftpClient::all_acked() {
    for(RemoteHost &r : remote_hosts){
@@ -191,9 +165,7 @@ bool MftpClient::all_acked() {
 
 // RUNS ON "client"
 void MftpClient::start() {
-   local_time_logs.push_back(LogItem(0));
-
-
+   local_time_logs.emplace_back(LogItem());
 }
 
 /**
@@ -220,15 +192,6 @@ void MftpClient::write_time_log() {
 
    csv_file.close();
    system_report();
-}
-
-
-/** Getter for system state
- *
- * @return true when system is still running, false when client has left the system. Used to break create_inbound_UDP_socket loop in main()
- */
-bool MftpClient::get_system_on() {
-   return system_on;
 }
 
 void MftpClient::system_report() {

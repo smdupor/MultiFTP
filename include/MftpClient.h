@@ -31,7 +31,6 @@ public:
    ~MftpClient() override;
    void start();
    void rdt_send(char data);
-   bool get_system_on();
    void shutdown();
 
 };

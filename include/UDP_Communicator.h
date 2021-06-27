@@ -1,18 +1,4 @@
 /**
- * NetworkCommunicator
- *
- * The NetworkCommunicator superclass encapsulates all functionality that is shared by both major components of the system,
- * the Registration Server and the P2P Client. This includes establishing listening sockets, establishing outgoing
- * connections, transmitting strings of data on the TCP stream, and receiving strings of data back. Any universally-shared
- * instance variables (such as port, a list of peers, verbosity flags) are also encapsulated in this superclass.
- *
- * Also, all of the messaging constants, and system-wide numeric constants (like timeout settings) are encapsulated here.
- *
- * Finally, universally shared utility methods, such as a string splitter and multiple pretty-print methods, are
- * encapsulated here.
- *
- *  Created on: May 31, 2021
- *      Author: smdupor
  */
 
 #ifndef INCLUDE_UDP_COMMUNICATOR_H_
@@ -32,12 +18,6 @@
 #include <netdb.h>
 
 
-// Hold information about a socket
-struct sockinfo {
-		int socket;
-		char * cli_addr;
-	};
-
 struct RemoteHost {
    explicit RemoteHost(sockaddr_in *addr, int sockfd) {
       this->address = addr;
@@ -55,12 +35,10 @@ struct RemoteHost {
  */
 struct LogItem {
    // On creation, log the immediate (steady) time and the input quantity
-   explicit LogItem(size_t qty) {
-      this->qty = qty;
+   explicit LogItem() {
       this->time = std::chrono::steady_clock::now();
    }
    std::chrono::steady_clock::time_point time;
-   size_t qty;
 };
 
 class UDP_Communicator{
@@ -71,9 +49,7 @@ protected:
    char in_buffer[MSG_LEN], out_buffer[MSG_LEN];
    uint32_t seq_num, ack_num;
 	std::string log;
-	int port;
-	bool debug, system_on;
-	std::time_t start_time;
+	bool debug;
 
    enum {DATA_PACKET = 1, ACK = 2, FIN = 3, RESET = 4};
 
@@ -90,7 +66,6 @@ public:
 	virtual ~UDP_Communicator();
    int create_inbound_UDP_socket(int port);
    int create_outbound_UDP_socket(int port);
-
 
    //Externally-accessible print methods (used in int main()s)
    static void error(std::string input);
