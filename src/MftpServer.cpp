@@ -13,9 +13,10 @@ MftpServer::MftpServer(std::string &file_path, std::string &logfile, int port, b
    system_port = port;
    seq_num = 0;
    ack_num = 1;
-
+   srand(getpid() * getpid() * std::time(nullptr));
    inbound_socket = create_inbound_UDP_socket(port);
-
+   loss_count = 0;
+   packet_count = 0;
    this->loss_probability =loss_probability * 100;
 
    remote_sock_addr = new sockaddr_in;
@@ -52,8 +53,11 @@ void MftpServer::rdt_receive() {
       bzero(in_buffer, MSG_LEN);
       int n = recvfrom(sockfd, (char *) in_buffer, MSG_LEN, 0, (struct sockaddr *) &*remote_sock_addr, &length);
       if(n > 0) {
-         if (decode_packet_type() == FIN)
+         if (decode_packet_type() == FIN) {
+            system_report();
             break;
+         }
+
 
          if (valid_seq_num() && valid_checksum() && valid_pkt_type() && probability_not_dropped()) {
             // write and ack
@@ -65,6 +69,7 @@ void MftpServer::rdt_receive() {
             sendto(sockfd, out_buffer, 8, 0, (const struct sockaddr *) &*remote_sock_addr, length);
             ++ack_num;
             ++seq_num;
+            ++packet_count;
          }
 
          //sendto(sockfd, out_msg.c_str(), strlen(out_msg.c_str()), 0, (const struct sockaddr *) &*remote_sock_addr, length);
@@ -103,8 +108,18 @@ bool MftpServer::valid_pkt_type() {
 bool MftpServer::probability_not_dropped() {
    if(rand() % 100 < loss_probability) {
       error("Packet loss, sequence number = " + std::to_string(decode_seq_num()));
+      ++loss_count;
       return false;
    }
    return true;
 
+}
+void MftpServer::system_report() {
+   double percentage = (double) loss_count / (double) packet_count;
+   warning(" * * * * * * * * * * * * * * * * * * SYSTEM REPORT  * * * * * * * * * * * * * * * * * * ");
+   warning( "              Local Packets Received Successfully  : " + std::to_string(packet_count));
+   warning( "              Local Packets Lost                   : " + std::to_string(loss_count));
+   warning( "              Local Configured Loss Rate           : " + std::to_string((float)loss_probability/100));
+   warning( "              Local Effective Loss Rate            : " + std::to_string(percentage));
+   warning(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ");
 }

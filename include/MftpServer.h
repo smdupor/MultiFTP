@@ -36,6 +36,8 @@ private:
    std::string filename;
    int inbound_socket, system_port;
    int loss_probability;
+   uint_fast32_t loss_count;
+   uint_fast64_t packet_count;
 
    bool valid_seq_num();
    bool valid_checksum();
@@ -47,6 +49,7 @@ public:
    ~MftpServer() override;
    void start();
    void rdt_receive();
+   void system_report();
 };
 
 

@@ -237,9 +237,9 @@ bool MftpClient::get_system_on() {
 
 void MftpClient::system_report() {
    double percentage = (double) loss_count / (double) packet_count;
-   warning(" * * * * * * * * * * * * SYSTEM REPORT  * * * * * * * * * * * * ");
-   warning( "              Packets Transmitted: " + std::to_string(packet_count));
-   warning( "              Packets Lost       : " + std::to_string(loss_count));
-   warning( "              Effective Loss Rate: " + std::to_string(percentage));
-   warning(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ");
+   warning(" * * * * * * * * * * * * * * * * * * SYSTEM REPORT  * * * * * * * * * * * * * * * * * * ");
+   warning( "                 Successful Packets Transmitted   : " + std::to_string(packet_count));
+   warning( "                 System-Wide Packets Lost         : " + std::to_string(loss_count));
+   warning( "                 System-Wide Effective Loss Rate  : " + std::to_string(percentage));
+   warning(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ");
 }
