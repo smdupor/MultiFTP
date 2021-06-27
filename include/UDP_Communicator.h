@@ -1,4 +1,12 @@
 /**
+ * UDP_Communicator.h superclass encapsulates all shared UDP communication code for MultiFTP Clients and Servers. Includes
+ * required buffers, functionality to read/write packet headers and perform checksums. Also includes shared utility
+ * functionality like terminal printing.
+ *
+ * Created on: June 23th, 2021
+ * Author: Stevan Dupor
+ * Copyright (C) 2021 Stevan Dupor - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited.
  */
 
 #ifndef INCLUDE_UDP_COMMUNICATOR_H_
@@ -17,7 +25,9 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-
+/**
+ * Encapsulate contact information, Current Sequence/segment number, and latest ack number, for a remote MultiFTP Server.
+ */
 struct RemoteHost {
    explicit RemoteHost(sockaddr_in *addr, int sockfd) {
       this->address = addr;
@@ -43,24 +53,28 @@ struct LogItem {
    std::chrono::steady_clock::time_point time;
 };
 
+/**
+ * Superclass to encapsulate shared code between server and client hosts.
+ */
 class UDP_Communicator {
-
 protected:
-
    static const int MSG_LEN = 1500;
    char in_buffer[MSG_LEN], out_buffer[MSG_LEN];
    uint32_t seq_num, ack_num;
    std::string log;
    bool debug;
 
+   // Define user-friendly packet types
    enum {
       DATA_PACKET = 1, ACK = 2, FIN = 3, RESET = 4
    };
 
+   // Read Packet headers
    uint32_t decode_seq_num();
    uint16_t decode_checksum();
    uint16_t decode_packet_type();
 
+   // Write packet headers
    void encode_seq_num(uint32_t seqnum);
    void encode_checksum();
    void encode_packet_type(int type);

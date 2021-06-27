@@ -1,8 +1,15 @@
 /**
+ * UDP_Communicator.cpp superclass encapsulates all shared UDP communication code for MultiFTP Clients and Servers. Includes
+ * required buffers, functionality to read/write packet headers and perform checksums. Also includes shared utility
+ * functionality like terminal printing.
+ *
+ * Created on: June 23th, 2021
+ * Author: Stevan Dupor
+ * Copyright (C) 2021 Stevan Dupor - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited.
  */
 
 #include "UDP_Communicator.h"
-#include "MftpClient.h"
 
 /**
  * Destructor -- override in subclasses.

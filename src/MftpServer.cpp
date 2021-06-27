@@ -1,7 +1,14 @@
-//
-// Created by smdupor on 6/25/21.
-//
-
+/**
+ * MftpServer.cpp class inherits all member functions from the UDP_Communicator superclass, and implements the rdt_receive()
+ * (Reliable Data Transfer Receive) API which receives packets from a remote client, checksums the packets for
+ * validity and in-orderness, and returns ACKs to the client when appropriate. The class also implements a
+ * probabilistic loss service to simulate lossy connections for performance experiments.
+ *
+ * Created on: June 23th, 2021
+ * Author: Stevan Dupor
+ * Copyright (C) 2021 Stevan Dupor - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited.
+ */
 
 #include "MftpServer.h"
 

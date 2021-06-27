@@ -1,4 +1,14 @@
 /**
+ * MftpClient.h class inherits all member functions from the UDP_Communicator superclass, and implements the rdt_send()
+ * (Reliable Data Transfer Send) API which takes a byte stream from a caller, and handles creation, checksumming, and
+ * transmission of packets. MftpClient also handles incoming SAW acks, timeouts, and retransmissions as appropriate.
+ * This class also handles timepoint measurement for experimental data gathering related to efficiency experiments
+ * on the SAW rdt_send/rdt_receive protocol.
+ *
+ * Created on: June 23th, 2021
+ * Author: Stevan Dupor
+ * Copyright (C) 2021 Stevan Dupor - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited.
  */
 
 #ifndef INCLUDE_MFTPCLIENT_H_
