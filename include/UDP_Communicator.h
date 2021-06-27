@@ -19,14 +19,18 @@
 #define INCLUDE_UDP_COMMUNICATOR_H_
 
 #include <iostream>
+#include <fstream>
 #include <list>
 #include <vector>
-
-#include <string.h>
-#include <unistd.h>
+#include <cstring>
 #include <ctime>
-#include <netinet/in.h>
 #include <chrono>
+#include <cmath>
+
+#include <unistd.h>
+#include <netinet/in.h>
+#include <netdb.h>
+
 
 // Hold information about a socket
 struct sockinfo {

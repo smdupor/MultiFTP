@@ -4,27 +4,6 @@
 #ifndef INCLUDE_MFTPCLIENT_H_
 #define INCLUDE_MFTPCLIENT_H_
 
-#include <iostream>
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
-#include <list>
-#include <ctime>
-#include <algorithm>
-#include <vector>
-#include <fstream>
-#include <thread>
-#include <mutex>
-
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <string.h>
-
 #include "UDP_Communicator.h"
 
 class MftpClient : public UDP_Communicator {

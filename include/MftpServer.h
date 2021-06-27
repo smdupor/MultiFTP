@@ -2,29 +2,10 @@
 // Created by smdupor on 6/25/21.
 //
 
-#ifndef MULTIFTP_MFTPSERVER_H
-#define MULTIFTP_MFTPSERVER_H
+#ifndef INCLUDE_MFTPSERVER_H
+#define INCLUDE_MFTPSERVER_H
 
-#include <iostream>
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
-#include <list>
-#include <ctime>
-#include <algorithm>
-#include <vector>
-#include <fstream>
-#include <thread>
-#include <mutex>
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <string.h>
 
 #include "UDP_Communicator.h"
 
@@ -53,4 +34,4 @@ public:
 };
 
 
-#endif //MULTIFTP_MFTPSERVER_H
+#endif //INCLUDE_MFTPSERVER_H
