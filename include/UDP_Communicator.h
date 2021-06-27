@@ -28,7 +28,7 @@ struct RemoteHost {
 
    sockaddr_in *address;
    int sockfd;
-   uint16_t segment_num, ack_num;
+   uint32_t segment_num, ack_num;
 };
 
 /**

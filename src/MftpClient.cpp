@@ -125,7 +125,7 @@ void MftpClient::SaW_process_acks_retransmissions() {
             int n = recvfrom(r.sockfd, (char *) in_buffer, MSG_LEN, 0, (struct sockaddr *) &*r.address,
                              &length);
             if (n > 0) {
-               uint16_t temp = decode_seq_num();
+               uint32_t temp = decode_seq_num();
                if (temp == seq_num + 1) {
                   r.ack_num = temp;
                   ++r.segment_num;
@@ -139,6 +139,7 @@ void MftpClient::SaW_process_acks_retransmissions() {
       if (((uint_fast64_t) std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() -
                                                                                  timeout_start).count()) >= timeout_us) {
          error("Timeout, sequence number = " + std::to_string(seq_num));
+         timeout_start = std::chrono::steady_clock::now();
          ++loss_count;
          for (RemoteHost &r : remote_hosts) {
             // If no ack for buffered packet from host (r), re-send.

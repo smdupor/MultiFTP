@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include <thread>
 
 #include "MftpClient.h"
 
@@ -46,9 +47,13 @@ int main(int argc, char *argv[]) {
       }
       fd.close();
       client.shutdown();
+      //Sleep while server resets so we get an accurate startup synchronization
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
    }
 
    //Say goodbye and exit.
    UDP_Communicator::info("***************System is exiting successfully***********\n");
+
+   system("(speaker-test -t sine -f 2200)& pid=$!; sleep 5.0s; kill -9 $pid");
    return EXIT_SUCCESS;
 }
