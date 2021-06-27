@@ -29,7 +29,6 @@ private:
 public:
    MftpServer(std::string &file_path, std::string &logfile, int port, bool verbose, float loss_probability);
    ~MftpServer() override;
-   void start();
    void rdt_receive();
    void system_report();
 };

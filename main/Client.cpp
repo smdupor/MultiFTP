@@ -38,10 +38,9 @@ int main(int argc, char *argv[]) {
 
    for (uint8_t i = 0; i < repetitions; ++i) {
       char f_in;
-      MftpClient client = MftpClient(remotes, logfile, port, false, max_seg);
-      client.start();
-
       std::ifstream fd(file_name, std::ios_base::binary);
+      MftpClient client = MftpClient(remotes, logfile, port, false, max_seg);
+
       while (fd >> std::noskipws >> f_in) {
          client.rdt_send(f_in);
       }

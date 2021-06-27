@@ -29,10 +29,10 @@ public:
    MftpClient(std::list<std::string> &server_list, std::string &logfile, int port, bool verbose,
               uint16_t max_seg_size);
    ~MftpClient() override;
-   void start();
    void rdt_send(char data);
    void shutdown();
 
+   void SaW_process_acks_retransmissions();
 };
 
 #endif /* INCLUDE_MFTPCLIENT_H_ */

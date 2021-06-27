@@ -33,7 +33,6 @@ int main(int argc, char *argv[]) {
    for (uint8_t i = 0; i < repetitions; ++i) {
       MftpServer server = MftpServer(file_name, logfile, port, false, loss_probability);
 
-      server.start();
       server.rdt_receive();
    }
 

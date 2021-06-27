@@ -20,6 +20,7 @@ MftpServer::MftpServer(std::string &file_path, std::string &logfile, int port, b
    remote_sock_addr = new sockaddr_in;
    bzero((char *) remote_sock_addr, sizeof(*remote_sock_addr));
    filename = file_path;
+
 }
 
 /**
@@ -29,12 +30,6 @@ MftpServer::~MftpServer() {
    free(remote_sock_addr);
 }
 
-/** Server0-sde
- */
-void MftpServer::start() {
-   local_time_logs.emplace_back(LogItem());
-}
-
 void MftpServer::rdt_receive() {
    int sockfd = inbound_socket;
    std::ofstream fd(filename, std::ios_base::binary);
@@ -42,6 +37,8 @@ void MftpServer::rdt_receive() {
    struct sockaddr_in cli_addr;
    bzero(&cli_addr, sizeof(cli_addr));
    socklen_t length = sizeof(*remote_sock_addr);
+
+   local_time_logs.emplace_back(LogItem());
 
    while (true) {
       bzero(in_buffer, MSG_LEN);
