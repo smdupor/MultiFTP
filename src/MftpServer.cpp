@@ -17,7 +17,7 @@ MftpServer::MftpServer(std::string &file_path, std::string &logfile, int port, b
    inbound_socket = create_inbound_UDP_socket(port);
    loss_count = 0;
    packet_count = 0;
-   this->loss_probability =loss_probability * 100;
+   this->loss_probability = std::roundf(loss_probability * 10000);
 
    remote_sock_addr = new sockaddr_in;
    bzero((char *) remote_sock_addr, sizeof(*remote_sock_addr));
@@ -106,7 +106,7 @@ bool MftpServer::valid_pkt_type() {
 }
 
 bool MftpServer::probability_not_dropped() {
-   if(rand() % 100 < loss_probability) {
+   if(rand() % 10000 < loss_probability) {
       error("Packet loss, sequence number = " + std::to_string(decode_seq_num()));
       ++loss_count;
       return false;
@@ -119,7 +119,7 @@ void MftpServer::system_report() {
    warning(" * * * * * * * * * * * * * * * * * * SYSTEM REPORT  * * * * * * * * * * * * * * * * * * ");
    warning( "              Local Packets Received Successfully  : " + std::to_string(packet_count));
    warning( "              Local Packets Lost                   : " + std::to_string(loss_count));
-   warning( "              Local Configured Loss Rate           : " + std::to_string((float)loss_probability/100));
+   warning( "              Local Configured Loss Rate           : " + std::to_string((float)loss_probability/10000));
    warning( "              Local Effective Loss Rate            : " + std::to_string(percentage));
    warning(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ");
 }
