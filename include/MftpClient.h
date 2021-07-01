@@ -19,24 +19,25 @@
 class MftpClient : public UDP_Communicator {
 
 private:
-   //Communication Variables and methods
+   //Communication Variables
    std::vector<RemoteHost> remote_hosts;
    uint16_t MSS, byte_index;
    int system_port;
-   bool all_acked();
-   void estimate_timeout();
 
    // Timing variables
    std::chrono::time_point<std::chrono::steady_clock> timeout_start;
    uint_fast64_t timeout_us;
    long double EstRTT, DevRTT;
 
-   // Utility variables and methods
+   // Utility variables
    std::vector<LogItem> local_time_logs;
    uint_fast32_t loss_count;
    uint_fast64_t packet_count;
+
    void system_report();
    void write_time_log();
+   bool all_acked();
+   void estimate_timeout();
 
 public:
    MftpClient(std::list<std::string> &server_list, std::string &logfile, int port, bool verbose,
@@ -44,7 +45,6 @@ public:
    ~MftpClient() override;
    void rdt_send(char data);
    void SaW_process_acks_retransmissions();
-
    void shutdown();
 
 };

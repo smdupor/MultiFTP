@@ -20,20 +20,20 @@ private:
    // Communication Variables
    struct sockaddr_in *remote_sock_addr;
    std::string filename;
-   int inbound_socket, system_port;
+   int inbound_socket;
    int loss_probability;
    int bytes_written;
-
-   // Communication Functions
-   bool valid_seq_num();
-   bool valid_checksum();
-   bool valid_pkt_type();
-   bool probability_not_dropped();
 
    // Utility Variables
    uint_fast64_t packet_count;
    uint_fast32_t loss_count;
    std::list<LogItem> local_time_logs;
+
+   // Communication Functions
+   bool valid_seq_num();
+   bool valid_checksum();
+   bool valid_data_pkt_type();
+   bool probability_not_dropped();
 
 public:
    MftpServer(std::string &file_path, std::string &logfile, int port, bool verbose, float loss_probability);
@@ -41,6 +41,5 @@ public:
    void rdt_receive();
    void system_report();
 };
-
 
 #endif //INCLUDE_MFTPSERVER_H

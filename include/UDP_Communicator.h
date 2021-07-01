@@ -37,9 +37,7 @@ protected:
    bool debug;
 
    // Define user-friendly packet types
-   enum {
-      DATA_PACKET = 1, ACK = 2, FIN = 3, RESET = 4
-   };
+   enum { DATA_PACKET = 1, ACK = 2, FIN = 3, RESET = 4 };
 
    // Read Packet headers
    uint32_t decode_seq_num();
@@ -47,7 +45,7 @@ protected:
    uint16_t decode_packet_type();
 
    // Write packet headers
-   void encode_seq_num(uint32_t seqnum);
+   void encode_seq_num(uint32_t sequence_number);
    void encode_checksum();
    void encode_packet_type(int type);
 
@@ -64,7 +62,7 @@ protected:
 
       sockaddr_in *address;
       int sockfd;
-      uint32_t segment_num, ack_num;
+      uint32_t segment_num, ack_num; // The latest segment/ack numbers for this client
    };
 
 /**
@@ -81,8 +79,8 @@ protected:
 
 public:
    virtual ~UDP_Communicator();
-   int create_inbound_UDP_socket(int port);
-   int create_outbound_UDP_socket(int port);
+   int create_bound_UDP_socket(int port);
+   int create_unbound_UDP_socket(int port);
 
    //Externally-accessible print methods (used in int main()s)
    static void error(std::string input);
