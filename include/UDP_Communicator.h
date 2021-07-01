@@ -26,7 +26,7 @@
 #include <netdb.h>
 
 /**
- * Encapsulate contact information, Current Sequence/segment number, and latest ack number, for a remote MultiFTP Server.
+ * Encapsulate contact information, Current Sequence/segment number, and latest ack number, for a remote MultiFTP Host.
  */
 struct RemoteHost {
    explicit RemoteHost(sockaddr_in *addr, int sockfd) {
@@ -58,9 +58,12 @@ struct LogItem {
  */
 class UDP_Communicator {
 protected:
+   // Communication Buffers
    static const int MSG_LEN = 1500;
    char in_buffer[MSG_LEN], out_buffer[MSG_LEN];
    uint32_t seq_num, ack_num;
+
+   // Utility Variables
    std::string log;
    bool debug;
 

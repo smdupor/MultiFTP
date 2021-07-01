@@ -13,26 +13,27 @@
 #ifndef INCLUDE_MFTPSERVER_H
 #define INCLUDE_MFTPSERVER_H
 
-
-
 #include "UDP_Communicator.h"
 
 class MftpServer : public UDP_Communicator {
-
 private:
-   std::list<LogItem> local_time_logs;
+   // Communication Variables
    struct sockaddr_in *remote_sock_addr;
    std::string filename;
    int inbound_socket, system_port;
    int loss_probability;
-   uint_fast32_t loss_count;
    int bytes_written;
-   uint_fast64_t packet_count;
 
+   // Communication Functions
    bool valid_seq_num();
    bool valid_checksum();
    bool valid_pkt_type();
    bool probability_not_dropped();
+
+   // Utility Variables
+   uint_fast64_t packet_count;
+   uint_fast32_t loss_count;
+   std::list<LogItem> local_time_logs;
 
 public:
    MftpServer(std::string &file_path, std::string &logfile, int port, bool verbose, float loss_probability);
