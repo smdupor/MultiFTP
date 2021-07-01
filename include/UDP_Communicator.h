@@ -25,37 +25,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-/**
- * Encapsulate contact information, Current Sequence/segment number, and latest ack number, for a remote MultiFTP Host.
- */
-struct RemoteHost {
-   explicit RemoteHost(sockaddr_in *addr, int sockfd) {
-      this->address = addr;
-      this->sockfd = sockfd;
-      segment_num = 0;
-      ack_num = 0;
-   }
-
-   sockaddr_in *address;
-   int sockfd;
-   uint32_t segment_num, ack_num;
-};
-
-/**
- * Encapsulate a datapoint for an accurate time value.
- */
-struct LogItem {
-   // On creation, log the immediate (steady) time and the input quantity
-   explicit LogItem() {
-      this->time = std::chrono::steady_clock::now();
-   }
-
-   std::chrono::steady_clock::time_point time;
-};
-
-/**
- * Superclass to encapsulate shared code between server and client hosts.
- */
 class UDP_Communicator {
 protected:
    // Communication Buffers
@@ -82,6 +51,33 @@ protected:
    void encode_checksum();
    void encode_packet_type(int type);
 
+/**
+ * Encapsulate contact information, Current Sequence/segment number, and latest ack number, for a remote MultiFTP Host.
+ */
+   struct RemoteHost {
+      explicit RemoteHost(sockaddr_in *addr, int sockfd) {
+         this->address = addr;
+         this->sockfd = sockfd;
+         segment_num = 0;
+         ack_num = 0;
+      }
+
+      sockaddr_in *address;
+      int sockfd;
+      uint32_t segment_num, ack_num;
+   };
+
+/**
+ * Encapsulate a datapoint for an accurate time value.
+ */
+   struct LogItem {
+      // On creation, log the immediate (steady) time
+      explicit LogItem() {
+         this->time = std::chrono::steady_clock::now();
+      }
+
+      std::chrono::steady_clock::time_point time;
+   };
 
 public:
    virtual ~UDP_Communicator();
