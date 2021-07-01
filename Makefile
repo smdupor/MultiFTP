@@ -23,21 +23,14 @@ $(OBJ_DIR_LIB)/%.o:	$(SRC_DIR_LIB)/%.cpp $(HEAD_FILES)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 	
 $(BIN_DIR)/%:	$(OBJ_DIR_EXE)/%.o
-	$(CXX) -o $@ $(subst $(BIN_DIR)/,$(OBJ_DIR_EXE)/,$@).o $(OBJ_FILES_LIB) $(HEAD_FILES) $(LDFLAGS) $(CXXFLAGS)
+	$(CXX) -o $@ -s $(subst $(BIN_DIR)/,$(OBJ_DIR_EXE)/,$@).o $(OBJ_FILES_LIB) $(HEAD_FILES) $(LDFLAGS) $(CXXFLAGS)
 
 all:	$(EXEC_FILES) $(OBJ_FILES_LIB)
 	@echo "Cleaning and Symlinking."
 	rm -f obj/lib/*.o
 	rm -f obj/exe/*.o
-	#ssh 192.168.1.31 'rm -f /home/smdupor/Server'
-	#ssh 192.168.1.32 'rm -f /home/smdupor/Server'
-	#scp bin/Server 192.168.1.31:/home/smdupor/
-	#scp bin/Client 192.168.1.31:/home/smdupor/
-	#scp bin/Server 192.168.1.32:/home/smdupor/
-	#ln -sf ./bin/Client Client
-	#Note Bindir used to say :	$(CXX) -o $@ $(subst $(BIN_DIR)/,$(OBJ_DIR_EXE)/,$@).o $(OBJ_FILES_LIB) $(HEAD_FILES) $(LDFLAGS) $(CXXFLAGS)
-	#Note CXX flags used to say: CXXFLAGS = -I include/ -O2 -g -Wall -fmessage-length=0 -std=c++11 -pthread
-	#ln -sf ./bin/RegServ RegServ
+	ln -sf ./bin/Client Client
+	ln -sf ./bin/Server Server
 	@echo "****************************************************************************"
 	@echo "************************ BUILD COMPLETE ************************************"
 	@echo "****************************************************************************"
@@ -47,7 +40,10 @@ show:
 	@echo "HEADERS=$(HEAD_FILES)"
 	@echo "SRC_FILES_EXE=$(SRC_FILES_EXE)"
 	@echo "$(EXEC_FILES)"
+	# Debugger Enable in BIN_DIR: $(CXX) -o $@ $(subst $(BIN_DIR)/,$(OBJ_DIR_EXE)/,$@).o $(OBJ_FILES_LIB) $(HEAD_FILES) $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	rm -rf *.o
 	rm -f ./bin/*
+	rm -f Server
+	rm -f Client
