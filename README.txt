@@ -1,4 +1,5 @@
-Compatibility: This program is fully compatible and tested with Ubuntu 14 through 21. Requires linux networking headers.
+Compatibility: This program is fully compatible and tested with Ubuntu 14 through 21.
+    Requires linux networking headers, g++, and make.
 
 QUICK-START GUIDE:
 1. scp the tarball to the systems you want to test on.
@@ -9,10 +10,12 @@ QUICK-START GUIDE:
    > cd MFTP-smdupor
    > make
 
+
 3. (For NCSU VCL): If you have not added IPTABLES rules to permit traffic used by this app, run the iptables
      configuration (requires sudo):
 
    > ./configure_iptables.sh
+
 
 4. SERVERS: The example file-to-be-transmitted is included in the tarball. It will always be overwritten, so removal is
     not *strictly* required, but to confirm functionality, you should remove it on all server hosts:
@@ -22,12 +25,13 @@ QUICK-START GUIDE:
 Now, start each server:
 
     > ./Server <port> <filename> <loss probability> <optional repeat>
-Ex: > ./Server 7735 linux-2.2.1.tar.bz2 0.05
+Eg: > ./Server 7735 linux-2.2.1.tar.bz2 0.05
+
 
 5. CLIENT: Once all servers are running and waiting, start Client using server hostnames as arguments:
 
     > ./Client <host a> <host b> <...> <port> <max_segment_size> <optional repeat>
-Ex: > ./Client 192.168.1.32 192.168.1.33 192.168.1.34 7735 500
+Eg: > ./Client 192.168.1.32 192.168.1.33 192.168.1.34 7735 500
 
 Optional Repeat arguments are in the form, "r2", "r3", "r4" ... for 2, 3, 4, ... repetitions of the experiment.
 
@@ -35,6 +39,7 @@ Optional Repeat arguments are in the form, "r2", "r3", "r4" ... for 2, 3, 4, ...
 6. EXITING: Upon experiment conclusion, the client will terminate all connections and exit. The Servers, upon
     acknowledgement of the terminated connection, will also exit. A statistics report is printed to the terminal at
     both the Client and all Servers before exiting.
+
 
 7. CONFIRMING SUCCESS:
     Uploaded files are stored in the same working directory as the ./Server symlink. To confirm a successful transfer,
@@ -44,6 +49,7 @@ Optional Repeat arguments are in the form, "r2", "r3", "r4" ... for 2, 3, 4, ...
 
    > md5sum ./linux-2.2.1.tar.bz2
         9028ee0a6c29908b0cc1758e446dd7d2 linux-2.2.1.tar.bz2
+
 
 APPENDIX: Directory Structure:
 ./bin       -- holds the compiled binaries. Please run the program using the included symlinks in the working directory.
