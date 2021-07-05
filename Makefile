@@ -16,6 +16,8 @@ OBJ_FILES_EXE = $(patsubst $(SRC_DIR_EXE)/%.cpp,$(OBJ_DIR_EXE)/%.o,$(SRC_FILES_E
 
 EXEC_FILES  = $(patsubst $(SRC_DIR_EXE)/%.cpp,$(BIN_DIR)/%,$(SRC_FILES_EXE))
 
+
+
 $(OBJ_DIR_EXE)/%.o:	$(SRC_DIR_EXE)/%.cpp $(OBJ_FILES_LIB) $(HEAD_FILES)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
@@ -25,15 +27,24 @@ $(OBJ_DIR_LIB)/%.o:	$(SRC_DIR_LIB)/%.cpp $(HEAD_FILES)
 $(BIN_DIR)/%:	$(OBJ_DIR_EXE)/%.o
 	$(CXX) -o $@ -s $(subst $(BIN_DIR)/,$(OBJ_DIR_EXE)/,$@).o $(OBJ_FILES_LIB) $(HEAD_FILES) $(LDFLAGS) $(CXXFLAGS)
 
-all:	$(EXEC_FILES) $(OBJ_FILES_LIB)
+all:	PRE_REQ $(EXEC_FILES) $(OBJ_FILES_LIB)
 	@echo "Cleaning and Symlinking."
-	rm -f obj/lib/*.o
-	rm -f obj/exe/*.o
+	rm -rf ./obj
 	ln -sf ./bin/Client Client
 	ln -sf ./bin/Server Server
 	@echo "****************************************************************************"
 	@echo "************************ BUILD COMPLETE ************************************"
 	@echo "****************************************************************************"
+
+PRE_REQ:
+	rm -rf ./obj
+	rm -rf ./bin
+	rm -rf ./Client
+	rm -rf ./Server
+	mkdir bin
+	mkdir obj
+	mkdir obj/lib
+	mkdir obj/exe
 
 show:
 	@echo "SRC_FILES_LIB=$(SRC_FILES_LIB)"
@@ -44,6 +55,7 @@ show:
 
 clean:
 	rm -rf *.o
-	rm -f ./bin/*
+	rm -rf ./bin
+	rm -rf ./obj
 	rm -f Server
 	rm -f Client
