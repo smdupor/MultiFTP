@@ -16,8 +16,6 @@ OBJ_FILES_EXE = $(patsubst $(SRC_DIR_EXE)/%.cpp,$(OBJ_DIR_EXE)/%.o,$(SRC_FILES_E
 
 EXEC_FILES  = $(patsubst $(SRC_DIR_EXE)/%.cpp,$(BIN_DIR)/%,$(SRC_FILES_EXE))
 
-
-
 $(OBJ_DIR_EXE)/%.o:	$(SRC_DIR_EXE)/%.cpp $(OBJ_FILES_LIB) $(HEAD_FILES)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
@@ -32,9 +30,13 @@ all:	PRE_REQ $(EXEC_FILES) $(OBJ_FILES_LIB)
 	rm -rf ./obj
 	ln -sf ./bin/Client Client
 	ln -sf ./bin/Server Server
-	@echo "****************************************************************************"
-	@echo "************************ BUILD COMPLETE ************************************"
-	@echo "****************************************************************************"
+	@echo "************************************************************************************************"
+	@echo "********************************** BUILD COMPLETE **********************************************"
+	@echo " "
+	@echo "************************************************************************************************"
+	@echo "********** To Start Client: ./Client <hosts> <port> <file> <MSS> <optional_repeat> *************"
+	@echo "********** To Start Server: ./Server <port> <file> <loss_prob> <optional_repeat> ***************"
+	@echo "************************************************************************************************"
 
 PRE_REQ:
 	rm -rf ./obj
